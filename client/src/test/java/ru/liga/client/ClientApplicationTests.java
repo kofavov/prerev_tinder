@@ -1,13 +1,13 @@
-package ru.liga.prerev_tinder;
+package ru.liga.client;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class PrerevTinderApplicationTests {
+class ClientApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }
