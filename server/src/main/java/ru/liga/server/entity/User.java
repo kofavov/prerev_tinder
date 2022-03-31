@@ -20,11 +20,14 @@ public class User {
     private Long id;
     @Column(name = "name", nullable = false)
     private String name;
+    @Column(name="heading",nullable = false)
+    private String heading;
     @Column(name = "gender", nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
     @Column(name = "description", nullable = false)
     private String description;
+
 
 //    @ManyToMany(cascade = CascadeType.ALL)
 //    @JoinTable(name = "lovers"
