@@ -1,12 +1,15 @@
 package ru.liga.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -28,14 +31,16 @@ public class User {
     @Column(name = "description", nullable = false)
     private String description;
 
-
+//
 //    @ManyToMany(cascade = CascadeType.ALL)
+//    @JsonIgnoreProperties({"users"})
 //    @JoinTable(name = "lovers"
 //            , joinColumns = @JoinColumn(name = "user_id")
 //            , inverseJoinColumns = @JoinColumn(name = "lover_id"))
 //    private Set<User> thisLovers = new HashSet<>();
 
 //    @ManyToMany(cascade = CascadeType.ALL,mappedBy = "thisLovers")
+//    @JsonIgnoreProperties({"users}"})
 //    private Set<User> lovedThis = new HashSet<>();
 
 //    public void addLovers(User user){
