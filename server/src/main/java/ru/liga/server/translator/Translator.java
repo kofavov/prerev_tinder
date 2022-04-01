@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Component
 public class Translator {
     public static void main(String[] args) {
         Translator translator = new Translator();
         System.out.println(translator.translate("ключ, барак, уют, вокзал " +
                 "линия другие приехал синий " +
-                "Федя, Агафья, Марфа, Голиаф "+
+                "Федя, Агафья, Марфа, Голиаф " +
                 "еда летоисчисление лето летний"));
     }
 
@@ -28,38 +29,59 @@ public class Translator {
     }
 
     private String getStringWithYat(String s) {
-        StringBuilder stringBuilder = new StringBuilder();
-        String[] words = s.split(" +");
-        Map<String, String> wordsWithYat = getWordWithYat();
-        for (String word : words) {
-            if (word.equals("")) continue;
-            String sign = getSign(word);
-            if (!sign.equals("")) word = word.substring(0, word.length() - 1);
-
-            if (wordsWithYat.containsKey(word)) {
-                word = wordsWithYat.get(word);
-            }
-            stringBuilder.append(word).append(sign).append(" ");
+//        StringBuilder stringBuilder = new StringBuilder();
+//        String[] words = s.split(" +");
+//        Map<String, String> wordsWithYat = getWordWithYat();
+//        for (String word : words) {
+//            if (word.equals("")) continue;
+//            String sign = getSign(word);
+//            if (!sign.equals("")) word = word.substring(0, word.length() - 1);
+//
+//            if (wordsWithYat.containsKey(word)) {
+//                word = wordsWithYat.get(word);
+//            }
+//            stringBuilder.append(word).append(sign).append(" ");
+//        }
+//        return stringBuilder.toString();
+        Map<String, String> roots = getRootWithYat();
+        for (Map.Entry<String, String> root : roots.entrySet()) {
+            s = s.replaceAll(root.getKey(), root.getValue());
         }
-        return stringBuilder.toString();
+        return s;
     }
 
-    private Map<String, String> getWordWithYat() {
-        List<String> words = new ArrayList<>();
+    private Map<String, String> getRootWithYat() {
+        List<String> root = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
         try {
-            words = Files.readAllLines(Path.of("server\\words_with_yat.csv"));
+            root = Files.readAllLines(Path.of("server\\root_with_yat.csv"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        for (String w : words) {
-            String[] values = w.split("\t");
+        for (String r : root) {
+            String[] values = r.split("\t");
             if (values.length == 2)
                 map.put(values[0], values[1]);
         }
         return map;
     }
+
+//    private Map<String, String> getWordWithYat() {
+//        List<String> words = new ArrayList<>();
+//        Map<String, String> map = new HashMap<>();
+//        try {
+//            words = Files.readAllLines(Path.of("server\\words_with_yat.csv"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        for (String w : words) {
+//            String[] values = w.split("\t");
+//            if (values.length == 2)
+//                map.put(values[0], values[1]);
+//        }
+//        return map;
+//    }
 
     private String getStringWithFeta(String s) {
         StringBuilder stringBuilder = new StringBuilder();
