@@ -5,22 +5,24 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class Translator {
-    public static void main(String[] args) {
-        Translator translator = new Translator();
-        System.out.println(translator.translate("ключ, барак, уют, вокзал " +
-                "линия другие приехал синий " +
-                "Федя, Агафья, Марфа, Голиаф " +
-                "еда летоисчисление лето летний"));
-    }
+//    public static void main(String[] args) {
+//        Translator translator = new Translator();
+//        System.out.println(translator.translate("ключ, барак, уют, вокзал " +
+//                "линия другие приехал синий " +
+//                "Федя, Агафья, Марфа, Голиаф "));
+//        System.out.println(translator.translate(
+//                "еда летоисчисление лето летний преступление печка печать печение " +
+//                "шелк пешеход паштет премия пена"));
+//        System.out.println(translator.translate("Хлеб Пешка Мешок метла мера "));
+//
+//    }
 
     public String translate(String s) {
+//        s = s.replaceAll("\n"," ");
         s = getStringWithYat(s);
         s = getStringWithHardSign(s);
         s = getStringWithFeta(s);
@@ -62,6 +64,9 @@ public class Translator {
             String[] values = r.split("\t");
             if (values.length == 2)
                 map.put(values[0], values[1]);
+                map.put(values[0].toUpperCase(Locale.ROOT),values[1].toUpperCase(Locale.ROOT));
+                map.put(values[0].substring(0,1).toUpperCase(Locale.ROOT)+values[0].substring(1),
+                        values[1].substring(0,1).toUpperCase(Locale.ROOT)+values[1].substring(1));
         }
         return map;
     }
@@ -157,6 +162,7 @@ public class Translator {
             if (word.equals("")) continue;
             String sign = getSign(word);
             if (!sign.equals("")) word = word.substring(0, word.length() - 1);
+
             if (word.endsWith("ь"))
                 word = word.substring(0, word.length() - 1) + "ъ";
             else if (word.matches(".+[б-джзк-нп-тф-щ]"))
