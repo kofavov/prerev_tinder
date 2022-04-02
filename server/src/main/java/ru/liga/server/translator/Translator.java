@@ -27,7 +27,7 @@ public class Translator {
         s = getStringWithHardSign(s);
         s = getStringWithFeta(s);
         s = getStringWithI(s);
-        return s;
+        return s.trim();
     }
 
     private String getStringWithYat(String s) {

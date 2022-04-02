@@ -31,6 +31,7 @@ public class MainController {
 
     @PostMapping("/users")
     public void saveNewUser(@RequestBody User user) {
+        System.out.println(user);
         userService.saveNewUser(user);
     }
 

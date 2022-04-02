@@ -8,12 +8,14 @@ import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.liga.client.controller.MainController;
+import ru.liga.client.entity.User;
 
 import java.util.Optional;
 
 public class Bot extends TelegramLongPollingBot {
     private final String name;
     private final String token;
+    private Update update;
 
     public Bot(String name, String token) {
         this.name = name;
@@ -23,6 +25,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        this.update = update;
         if (update.hasMessage()) {
             try {
                 handleMessage(update.getMessage());
@@ -39,17 +42,24 @@ public class Bot extends TelegramLongPollingBot {
             if (entity.isEmpty()) {
                 return;
             }
-            String command = message.getText();
-            executeCommand(message, command);
+
+            executeCommand(message);
         }
     }
 
-    private void executeCommand(Message message, String command) throws TelegramApiException {
+    private void executeCommand(Message message) throws TelegramApiException {
         MainController mainController = new MainController();
-        if (command.equals("/all"))
-            execute(SendMessage.builder().text(mainController.getAllUsers())
+        mainController.execute(message,this);
+    }
+
+    public void  sendMessage(Message message,String s){
+        try {
+            execute(SendMessage.builder().text(s)
                     .chatId(message.getChatId().toString())
                     .build());
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -61,4 +71,5 @@ public class Bot extends TelegramLongPollingBot {
     public String getBotToken() {
         return token;
     }
+
 }

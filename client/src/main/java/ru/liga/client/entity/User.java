@@ -1,15 +1,13 @@
 package ru.liga.client.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @EqualsAndHashCode
+@AllArgsConstructor
 public class User {
     @JsonProperty("id")
     private Long id;
@@ -24,10 +22,11 @@ public class User {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" +
-                "id = " + id + ", " +
-                "name = " + name + ", " +
-                "gender = " + gender + ", " +
-                "description = " + description + ")";
+        return "{" +
+                "\"id\":" + id + ", " +
+                "\"name\":\"" + name + "\", " +
+                "\"heading\":\""+ heading + "\", " +
+                "\"gender\":\"" + gender + "\", " +
+                "\"description\":\"" + description + "\"}";
     }
 }
