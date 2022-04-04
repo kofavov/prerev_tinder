@@ -8,8 +8,8 @@ import ru.liga.client.telegram.cache.UserDataCache;
 
 @Component
 public class TelegramFacade {
-    private BotStateContext botStateContext;
-    private UserDataCache userDataCache;
+    private final BotStateContext botStateContext;
+    private final UserDataCache userDataCache;
 
     public TelegramFacade(BotStateContext botStateContext, UserDataCache userDataCache) {
         this.botStateContext = botStateContext;
@@ -32,7 +32,7 @@ public class TelegramFacade {
         SendMessage replyMessage;
         switch (inputMessage){
             case "/start":
-                botState = BotState.FILLING_PROFILE;
+                botState = BotState.START;
                 break;
 //            case "/name":
 //                botState = BotState.ASK_NAME;
@@ -52,6 +52,7 @@ public class TelegramFacade {
         }
         userDataCache.setUsersCurrentBotState(id,botState);
         replyMessage = botStateContext.processInputMessage(botState,message);
+
         return replyMessage;
     }
 }

@@ -3,6 +3,7 @@ package ru.liga.client.telegram.botapi.handlers;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.liga.client.controller.ServerController;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ReplyMessagesService;
 import ru.liga.client.telegram.botapi.BotState;
@@ -12,11 +13,13 @@ import ru.liga.client.telegram.cache.UserDataCache;
 public class FillingProfileHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final ReplyMessagesService messagesService;
+    private final ServerController serverController;
 
     public FillingProfileHandler(UserDataCache userDataCache,
-                                 ReplyMessagesService messagesService) {
+                                 ReplyMessagesService messagesService, ServerController serverController) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
+        this.serverController = serverController;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class FillingProfileHandler implements InputMessageHandler {
 
     @Override
     public BotState getHandlerName() {
-        return BotState.FILLING_PROFILE;
+        return BotState.START;
     }
 
     private SendMessage processUsersInput(Message inputMsg) {
@@ -41,6 +44,20 @@ public class FillingProfileHandler implements InputMessageHandler {
         BotState botState = userDataCache.getUsersCurrentBotState(userId);
 
         SendMessage replyToUser = null;
+
+        if (botState.equals(BotState.START)){
+            User user = serverController.getUserById(userId);
+            if (user==null){
+                botState = BotState.FILLING_PROFILE;
+            }
+            else {
+                botState = BotState.FILLED_PROFILE;
+                replyToUser = new SendMessage
+                        (String.valueOf(chatId), String.format("%s %s",
+                                "Анкета уже была создана\nДанные по вашей анкете"
+                                , user));
+            }
+        }
 
         if (botState.equals(BotState.FILLING_PROFILE)) {
             replyToUser = messagesService.getReplyMessage(String.valueOf(chatId),
@@ -75,6 +92,8 @@ public class FillingProfileHandler implements InputMessageHandler {
         if (botState.equals(BotState.SHOW_PROFILE)) {
             profileData.setDescription(usersAnswer);
             userDataCache.setUsersCurrentBotState(userId, BotState.FILLED_PROFILE);
+            serverController.saveNewUser(profileData);
+            profileData = serverController.getUserById(userId);
             replyToUser = new SendMessage(String.valueOf(chatId), String.format("%s %s", "Данные по вашей анкете", profileData));
         }
 

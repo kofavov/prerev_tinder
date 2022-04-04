@@ -23,7 +23,7 @@ public class BotStateContext {
 
     private InputMessageHandler findMessageHandler(BotState currentState) {
         if (isFillingProfileState(currentState)) {
-            return messageHandlers.get(BotState.FILLING_PROFILE);
+            return messageHandlers.get(BotState.START);
         }
 
         return messageHandlers.get(currentState);
@@ -31,6 +31,7 @@ public class BotStateContext {
 
     private boolean isFillingProfileState(BotState currentState) {
         switch (currentState) {
+            case START:
             case ASK_NAME:
             case ASK_HEAD:
             case ASK_GENDER:

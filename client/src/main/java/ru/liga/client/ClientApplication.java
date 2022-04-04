@@ -36,11 +36,11 @@ public class ClientApplication {
 //        }
 //        return bot;
 //    }
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder
-                .setConnectTimeout(Duration.ofSeconds(1))
-                .setReadTimeout(Duration.ofSeconds(2))
-                .build();
-    }
+//    @Bean
+//    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+//        return builder
+//                .setConnectTimeout(Duration.ofSeconds(1))
+//                .setReadTimeout(Duration.ofSeconds(2))
+//                .build();
+//    }
 }
