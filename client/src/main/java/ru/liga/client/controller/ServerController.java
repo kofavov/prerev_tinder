@@ -35,7 +35,7 @@ public class ServerController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<String>(user.toString(), httpHeaders);
+        HttpEntity<String> entity = new HttpEntity<String>(user.toJson(), httpHeaders);
 //        System.out.println(entity);
         ResponseEntity<HttpStatus> response = restTemplate.exchange(urlResource, HttpMethod.POST, entity, HttpStatus.class);
     }
@@ -50,29 +50,39 @@ public class ServerController {
             ResponseEntity<User> response = restTemplate.exchange(url, HttpMethod.GET, entity, User.class);
             user = response.getBody();
         } catch (RestClientException e) {
-            log.debug("Данных о пользователе с id {} нет",id);
+            log.info("Данных о пользователе с id {} нет", id);
         }
-
-        fillLoversMap(id, entity, Objects.requireNonNull(user));
-        fillLovedMap(id, entity,Objects.requireNonNull(user));
+        if (user != null) {
+            fillLoversMap(id, entity, user);
+            fillLovedMap(id, entity, user);
+        }
 
         return user;
     }
-        private void fillLovedMap(long id, HttpEntity<String> entity, User user) {
-        String urlLoved = urlResource + "/loved/" + id;
-        HashMap<Long,User> lovedMap = user.getLoved();
-        ResponseEntity<User[]> responseLovers = restTemplate.exchange(urlLoved, HttpMethod.GET, entity, User[].class);
-        for (User u: Objects.requireNonNull(responseLovers.getBody())) {
-            lovedMap.put(u.getId(),u);
+
+    private void fillLovedMap(long id, HttpEntity<String> entity, User user) {
+        try {
+            String urlLoved = urlResource + "/loved/" + id;
+            HashMap<Long, User> lovedMap = user.getLoved();
+            ResponseEntity<User[]> responseLovers = restTemplate.exchange(urlLoved, HttpMethod.GET, entity, User[].class);
+            for (User u : Objects.requireNonNull(responseLovers.getBody())) {
+                lovedMap.put(u.getId(), u);
+            }
+        } catch (RestClientException e) {
+            log.info("Данных о возлюбленных нет user {}", id);
         }
     }
 
     private void fillLoversMap(long id, HttpEntity<String> entity, User user) {
-        String urlLovers = urlResource + "/lovers/" + id;
-        HashMap<Long,User> loversMap = user.getLovers();
-        ResponseEntity<User[]> responseLovers = restTemplate.exchange(urlLovers, HttpMethod.GET, entity, User[].class);
-        for (User u: Objects.requireNonNull(responseLovers.getBody())) {
-            loversMap.put(u.getId(),u);
+        try {
+            String urlLovers = urlResource + "/lovers/" + id;
+            HashMap<Long, User> loversMap = user.getLovers();
+            ResponseEntity<User[]> responseLovers = restTemplate.exchange(urlLovers, HttpMethod.GET, entity, User[].class);
+            for (User u : Objects.requireNonNull(responseLovers.getBody())) {
+                loversMap.put(u.getId(), u);
+            }
+        } catch (RestClientException e) {
+            log.info("Данных о влюбленных нет user {}", id);
         }
     }
 

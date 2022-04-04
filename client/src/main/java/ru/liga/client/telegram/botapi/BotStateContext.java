@@ -36,8 +36,8 @@ public class BotStateContext {
             case ASK_HEAD:
             case ASK_GENDER:
             case ASK_DESC:
-            case SHOW_PROFILE:
             case FILLING_PROFILE:
+            case FILLED_PROFILE:
                 return true;
             default:
                 return false;

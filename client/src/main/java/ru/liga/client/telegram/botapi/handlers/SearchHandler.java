@@ -11,12 +11,12 @@ import ru.liga.client.telegram.botapi.InputMessageHandler;
 import ru.liga.client.telegram.cache.UserDataCache;
 
 @Component
-public class DataHandler implements InputMessageHandler {
+public class SearchHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final ReplyMessagesService messagesService;
     private final ServerController serverController;
 
-    public DataHandler(UserDataCache userDataCache, ReplyMessagesService messagesService, ServerController serverController) {
+    public SearchHandler(UserDataCache userDataCache, ReplyMessagesService messagesService, ServerController serverController) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
         this.serverController = serverController;
@@ -29,7 +29,7 @@ public class DataHandler implements InputMessageHandler {
 
     @Override
     public BotState getHandlerName() {
-        return BotState.FILLED_PROFILE;
+        return BotState.SEARCH;
     }
 
     private SendMessage processUsersInput(Message inputMsg) {

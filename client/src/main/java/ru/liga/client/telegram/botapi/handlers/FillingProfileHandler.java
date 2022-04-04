@@ -3,12 +3,18 @@ package ru.liga.client.telegram.botapi.handlers;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.liga.client.controller.ServerController;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ReplyMessagesService;
 import ru.liga.client.telegram.botapi.BotState;
 import ru.liga.client.telegram.botapi.InputMessageHandler;
 import ru.liga.client.telegram.cache.UserDataCache;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class FillingProfileHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
@@ -51,11 +57,7 @@ public class FillingProfileHandler implements InputMessageHandler {
                 botState = BotState.FILLING_PROFILE;
             }
             else {
-                botState = BotState.FILLED_PROFILE;
-                replyToUser = new SendMessage
-                        (String.valueOf(chatId), String.format("%s %s",
-                                "Анкета уже была создана\nДанные по вашей анкете"
-                                , user));
+                return getMessageWhenUserAlreadyExist(userId, chatId, user);
             }
         }
 
@@ -75,7 +77,7 @@ public class FillingProfileHandler implements InputMessageHandler {
         if (botState.equals(BotState.ASK_GENDER)) {
             replyToUser = messagesService.getReplyMessage(String.valueOf(chatId), "reply.askGender");
             profileData.setName(usersAnswer);
-            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_HEAD);
+            replyToUser.setReplyMarkup(getGenderButtonsMarkup());
         }
 
         if (botState.equals(BotState.ASK_HEAD)){
@@ -87,18 +89,54 @@ public class FillingProfileHandler implements InputMessageHandler {
         if (botState.equals(BotState.ASK_DESC)){
             replyToUser = messagesService.getReplyMessage(String.valueOf(chatId), "reply.askDesc");
             profileData.setHeading(usersAnswer);
-            userDataCache.setUsersCurrentBotState(userId, BotState.SHOW_PROFILE);
-        }
-        if (botState.equals(BotState.SHOW_PROFILE)) {
-            profileData.setDescription(usersAnswer);
             userDataCache.setUsersCurrentBotState(userId, BotState.FILLED_PROFILE);
+        }
+        if (botState.equals(BotState.FILLED_PROFILE)) {
+            profileData.setDescription(usersAnswer);
+            userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
             serverController.saveNewUser(profileData);
             profileData = serverController.getUserById(userId);
-            replyToUser = new SendMessage(String.valueOf(chatId), String.format("%s %s", "Данные по вашей анкете", profileData));
+
+            replyToUser = messagesService.getReplyMessage(String.valueOf(chatId), "reply.help");
         }
 
         userDataCache.saveUserProfileData(userId, profileData);
 
         return replyToUser;
     }
+
+    private SendMessage getMessageWhenUserAlreadyExist(long userId, long chatId, User user) {
+        SendMessage replyToUser;
+        replyToUser = new SendMessage(String.valueOf(chatId), String.format("%s %s \n%s",
+                        "Анкета уже была создана\nДанные по вашей анкете"
+                        , user
+                        , messagesService
+                        .getReplyMessage(String.valueOf(chatId)
+                                , "reply.help").getText()));
+        userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
+        userDataCache.saveUserProfileData(userId, user);
+        return replyToUser;
+    }
+    private InlineKeyboardMarkup getGenderButtonsMarkup() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        InlineKeyboardButton buttonGenderMan = new InlineKeyboardButton();
+        InlineKeyboardButton buttonGenderWoman = new InlineKeyboardButton();
+        buttonGenderMan.setText("Сударъ");
+        buttonGenderWoman.setText("Сударыня");
+        //Every button must have callBackData, or else not work !
+        buttonGenderMan.setCallbackData("buttonMan");
+        buttonGenderWoman.setCallbackData("buttonWoman");
+
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        keyboardButtonsRow1.add(buttonGenderMan);
+        keyboardButtonsRow1.add(buttonGenderWoman);
+
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(keyboardButtonsRow1);
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+
+        return inlineKeyboardMarkup;
+    }
+
 }

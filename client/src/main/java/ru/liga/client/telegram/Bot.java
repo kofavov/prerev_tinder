@@ -33,6 +33,13 @@ public class Bot extends TelegramWebhookBot {
         return telegramFacade.handleUpdate(update);
     }
 
+    public void send(SendMessage message){
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public String getBotUsername() {
         return name;
