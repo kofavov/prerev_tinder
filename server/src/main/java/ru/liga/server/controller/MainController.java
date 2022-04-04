@@ -25,8 +25,15 @@ public class MainController {
     }
 
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable("id") long id){
-        return userService.getUserById(id);
+    public ResponseEntity<User> getUserById(@PathVariable("id") long id){
+        ResponseEntity<User> response;
+        try {
+            response = new ResponseEntity<>(userService.getUserById(id),HttpStatus.OK);
+        }catch (Exception e){
+            response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
     }
 
     @PostMapping("/users")
