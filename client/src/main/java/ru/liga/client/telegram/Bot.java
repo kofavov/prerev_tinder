@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -21,19 +24,21 @@ public class Bot extends TelegramWebhookBot {
     private final String webHookPath;
 
     private final TelegramFacade telegramFacade;
+//    private final LongBot longBot;
     public Bot(String name, String token, String webHookPath, TelegramFacade telegramFacade) {
         this.name = name;
         this.token = token;
         this.webHookPath = webHookPath;
         this.telegramFacade = telegramFacade;
+//        longBot = new LongBot();
     }
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        return telegramFacade.handleUpdate(update);
+        return telegramFacade.handleUpdate(update,this);
     }
 
-    public void send(SendMessage message){
+    public void sendImage(SendPhoto message){
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -54,6 +59,23 @@ public class Bot extends TelegramWebhookBot {
     public String getBotPath() {
         return webHookPath;
     }
+//    class LongBot extends TelegramLongPollingBot{
+//
+//        @Override
+//        public String getBotUsername() {
+//            return Bot.this.getBotUsername();
+//        }
+//
+//        @Override
+//        public String getBotToken() {
+//            return Bot.this.getBotToken();
+//        }
+//
+//        @Override
+//        public void onUpdateReceived(Update update) {
+//            execute(SendPhoto.builder().photo("client/prerev-background.jpg").chatId(update.))
+//        }
+//    }
 //    @Override
 //    public void onUpdateReceived(Update update) {
 //        this.update = update;

@@ -34,13 +34,8 @@ public class User {
 
     @Override
     public String toString() {
-        return "id=" + id + '\n' +
-                "name='" + name + '\n' +
-                "gender='" + gender + '\n' +
-                "heading='" + heading + '\n' +
-                "description='" + description + '\n' +
-                "lovers=" + lovers + "\n" +
-                "loved=" + loved;
+        return heading  + " " + description;
+
     }
 
     public String toJson() {

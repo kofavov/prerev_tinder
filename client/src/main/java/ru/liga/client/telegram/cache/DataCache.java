@@ -11,4 +11,6 @@ public interface DataCache {
     User getUserProfileData(long userId);
 
     void saveUserProfileData(long userId, User userProfileData);
+
+    void removeUser(long userId);
 }

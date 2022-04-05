@@ -40,4 +40,10 @@ public class UserDataCache implements DataCache {
     public void saveUserProfileData(long userId, User userProfileData) {
         usersProfileData.put(userId, userProfileData);
     }
+
+    @Override
+    public void removeUser(long userId) {
+        usersProfileData.remove(userId);
+        usersBotStates.remove(userId);
+    }
 }

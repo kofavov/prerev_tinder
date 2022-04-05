@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.liga.client.entity.User;
+import ru.liga.client.telegram.Bot;
 import ru.liga.client.telegram.cache.UserDataCache;
 
 @Slf4j
@@ -22,7 +23,7 @@ public class TelegramFacade {
         this.userDataCache = userDataCache;
     }
 
-    public BotApiMethod<?> handleUpdate(Update update) {
+    public BotApiMethod<?> handleUpdate(Update update, Bot bot) {
         BotApiMethod<?> replyMessage = null;
 
         if (update.hasCallbackQuery()) {
@@ -33,7 +34,7 @@ public class TelegramFacade {
             replyMessage = processCallBackQuery(callbackQuery);
         }
 
-        replyMessage = handleInputMessage(update);
+        replyMessage = handleInputMessage(update,bot);
 
         return replyMessage;
     }
@@ -42,16 +43,6 @@ public class TelegramFacade {
         final long chatId = buttonQuery.getMessage().getChatId();
         final long userId = buttonQuery.getFrom().getId();
         BotApiMethod<?> callBackAnswer = null;
-
-        //From Destiny choose buttons
-//        if (buttonQuery.getData().equals("buttonYes")) {
-//            callBackAnswer = new SendMessage(chatId, "Как тебя зовут ?");
-//            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_AGE);
-//        } else if (buttonQuery.getData().equals("buttonNo")) {
-//            callBackAnswer = sendAnswerCallbackQuery("Возвращайся, когда будешь готов", false, buttonQuery);
-//        } else if (buttonQuery.getData().equals("buttonIwillThink")) {
-//            callBackAnswer = sendAnswerCallbackQuery("Данная кнопка не поддерживается", true, buttonQuery);
-//        }
 
         //From Gender choose buttons
         if (buttonQuery.getData().equals("buttonMan")) {
@@ -87,7 +78,7 @@ public class TelegramFacade {
     }
 
 
-    private BotApiMethod<?> handleInputMessage(Update update) {
+    private BotApiMethod<?> handleInputMessage(Update update, Bot bot) {
         long userId = getUserId(update);
         BotState botState = userDataCache.getUsersCurrentBotState(userId);
         BotApiMethod<?> replyMessage;
@@ -122,7 +113,13 @@ public class TelegramFacade {
             }
         }
         userDataCache.setUsersCurrentBotState(userId, botState);
-        replyMessage = botStateContext.processInputMessage(botState, update,userId);
+        try {
+            replyMessage = botStateContext.processInputMessage(botState, update,userId,bot);
+        }catch (Exception e){
+            userDataCache.removeUser(userId);
+            replyMessage = new SendMessage(String.valueOf(userId),"ошибка введите /start");
+            log.info("не удалось обработать запрос пользователя {}",userId);
+        }
 
         return replyMessage;
     }

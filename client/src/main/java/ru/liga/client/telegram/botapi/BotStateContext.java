@@ -5,6 +5,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.liga.client.telegram.Bot;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,9 @@ public class BotStateContext {
         messageHandlers.forEach(handler -> this.messageHandlers.put(handler.getHandlerName(), handler));
     }
 
-    public BotApiMethod<?> processInputMessage(BotState currentState, Update update, long userId) {
+    public BotApiMethod<?> processInputMessage(BotState currentState, Update update, long userId, Bot bot) {
         InputMessageHandler currentMessageHandler = findMessageHandler(currentState);
-        return currentMessageHandler.handle(update, userId);
+        return currentMessageHandler.handle(update, userId,bot);
     }
 
     private InputMessageHandler findMessageHandler(BotState currentState) {

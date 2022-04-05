@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.liga.client.controller.ServerController;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ReplyMessagesService;
+import ru.liga.client.telegram.Bot;
 import ru.liga.client.telegram.botapi.BotState;
 import ru.liga.client.telegram.botapi.InputMessageHandler;
 import ru.liga.client.telegram.cache.UserDataCache;
@@ -31,7 +32,7 @@ public class FillingProfileHandler implements InputMessageHandler {
     }
 
     @Override
-    public BotApiMethod<?> handle(Update update, long userId) {
+    public BotApiMethod<?> handle(Update update, long userId, Bot bot) {
         return processUsersInput(update,userId);
     }
 
@@ -44,7 +45,7 @@ public class FillingProfileHandler implements InputMessageHandler {
         String usersAnswer = "";
         Message message = update.getMessage();
         if (message != null && message.hasText()){
-            usersAnswer = message.getText();
+            usersAnswer = message.getText().replaceAll("\n"," ");
         }
 
         User profileData = userDataCache.getUserProfileData(userId);
