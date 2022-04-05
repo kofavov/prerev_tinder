@@ -2,8 +2,9 @@ package ru.liga.client.telegram.botapi.handlers;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.liga.client.controller.ServerController;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ReplyMessagesService;
@@ -25,16 +26,14 @@ public class ShowProfileHandler implements InputMessageHandler {
     }
 
     @Override
-    public SendMessage handle(Message inputMsg) {
-        long userId = inputMsg.getFrom().getId();
-        long chatId = inputMsg.getChatId();
+    public BotApiMethod<?> handle(Update update, long userId) {
         User user = userDataCache.getUserProfileData(userId);
         if (user.getId()==null){
             user = serverController.getUserById(userId);
             userDataCache.saveUserProfileData(userId, user);
         }
         userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
-        return new SendMessage(String.valueOf(chatId)
+        return new SendMessage(String.valueOf(userId)
                 , String.format("%s %s", "Данные по вашей анкете:\n"
                 , user));
     }

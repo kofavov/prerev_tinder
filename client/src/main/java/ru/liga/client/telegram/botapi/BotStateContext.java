@@ -1,8 +1,10 @@
 package ru.liga.client.telegram.botapi;
 
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,9 +18,9 @@ public class BotStateContext {
         messageHandlers.forEach(handler -> this.messageHandlers.put(handler.getHandlerName(), handler));
     }
 
-    public SendMessage processInputMessage(BotState currentState, Message message) {
+    public BotApiMethod<?> processInputMessage(BotState currentState, Update update, long userId) {
         InputMessageHandler currentMessageHandler = findMessageHandler(currentState);
-        return currentMessageHandler.handle(message);
+        return currentMessageHandler.handle(update, userId);
     }
 
     private InputMessageHandler findMessageHandler(BotState currentState) {

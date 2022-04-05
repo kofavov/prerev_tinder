@@ -1,10 +1,10 @@
 package ru.liga.client.telegram.botapi.handlers;
 
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.liga.client.controller.ServerController;
-import ru.liga.client.entity.User;
 import ru.liga.client.service.ReplyMessagesService;
 import ru.liga.client.telegram.botapi.BotState;
 import ru.liga.client.telegram.botapi.InputMessageHandler;
@@ -23,8 +23,8 @@ public class SearchHandler implements InputMessageHandler {
     }
 
     @Override
-    public SendMessage handle(Message message) {
-        return processUsersInput(message);
+    public BotApiMethod<?> handle(Update update, long userId) {
+        return processUsersInput(update,userId);
     }
 
     @Override
@@ -32,15 +32,15 @@ public class SearchHandler implements InputMessageHandler {
         return BotState.SEARCH;
     }
 
-    private SendMessage processUsersInput(Message inputMsg) {
-        String usersAnswer = inputMsg.getText();
-        long userId = inputMsg.getFrom().getId();
-        long chatId = inputMsg.getChatId();
-
-        User profileData = userDataCache.getUserProfileData(userId);
-        BotState botState = userDataCache.getUsersCurrentBotState(userId);
-
-        SendMessage replyToUser = null;
+    private SendMessage processUsersInput(Update update, long userId) {
+//        String usersAnswer = inputMsg.getText();
+//        long userId = inputMsg.getFrom().getId();
+//        long chatId = inputMsg.getChatId();
+//
+//        User profileData = userDataCache.getUserProfileData(userId);
+//        BotState botState = userDataCache.getUsersCurrentBotState(userId);
+//
+//        SendMessage replyToUser = null;
 
         return null;
     }
