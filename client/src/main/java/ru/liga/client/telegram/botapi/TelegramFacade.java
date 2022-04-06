@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.liga.client.controller.ServerController;
 import ru.liga.client.entity.User;
 import ru.liga.client.telegram.Bot;
 import ru.liga.client.telegram.cache.UserDataCache;
@@ -17,13 +18,15 @@ import ru.liga.client.telegram.cache.UserDataCache;
 public class TelegramFacade {
     private final BotStateContext botStateContext;
     private final UserDataCache userDataCache;
+    private final ServerController serverController;
 
-    public TelegramFacade(BotStateContext botStateContext, UserDataCache userDataCache) {
+    public TelegramFacade(BotStateContext botStateContext, UserDataCache userDataCache, ServerController serverController) {
         this.botStateContext = botStateContext;
         this.userDataCache = userDataCache;
+        this.serverController = serverController;
     }
 
-    public BotApiMethod<?> handleUpdate(Update update, Bot bot) {
+    public BotApiMethod<?> handleUpdate(Update update, Bot bot)  {
         BotApiMethod<?> replyMessage = null;
 
         if (update.hasCallbackQuery()) {
@@ -34,7 +37,7 @@ public class TelegramFacade {
             replyMessage = processCallBackQuery(callbackQuery);
         }
 
-        replyMessage = handleInputMessage(update,bot);
+        replyMessage = handleInputMessage(update, bot);
 
         return replyMessage;
     }
@@ -59,14 +62,73 @@ public class TelegramFacade {
             callBackAnswer = new SendMessage(String.valueOf(chatId), "Заголовок");
         } else if (buttonQuery.getData().equals("buttonProfile")) {
             userDataCache.setUsersCurrentBotState(userId, BotState.SHOW_PROFILE);
-
         } else if (buttonQuery.getData().equals("buttonSearch")) {
             userDataCache.setUsersCurrentBotState(userId, BotState.SEARCH);
+        } else if (buttonQuery.getData().equals("buttonSearchMan")) {
+            removeCacheSearch(userId);
+            userDataCache.fillUsersProfilesForSearch(userId,
+                    serverController.getAllWithFilter(u -> u.getGender().equals("Сударъ")));
+            userDataCache.setUsersCurrentBotState(userId, BotState.CHOSEN_LOVERS_GENDER);
+        } else if (buttonQuery.getData().equals("buttonSearchWoman")) {
+            removeCacheSearch(userId);
+            userDataCache.fillUsersProfilesForSearch(userId,
+                    serverController.getAllWithFilter(u -> u.getGender().equals("Сударыня")));
+            userDataCache.setUsersCurrentBotState(userId, BotState.CHOSEN_LOVERS_GENDER);
+        } else if (buttonQuery.getData().equals("buttonSearchAll")) {
+            removeCacheSearch(userId);
+            userDataCache.fillUsersProfilesForSearch(userId,
+                    serverController.getAllWithFilter(u -> u.getGender().equals("Сударъ")
+                            || u.getGender().equals("Сударыня")));
+            userDataCache.setUsersCurrentBotState(userId, BotState.CHOSEN_LOVERS_GENDER);
+        } else if (buttonQuery.getData().equals("buttonDislike")) {
+            userDataCache.setUsersCurrentBotState(userId, BotState.NEXT);
+            User user = userDataCache.getUserProfileData(userId);
+            Long lastProfile = userDataCache.getLastSearchIdForUser(userId);
+            try {
+                user.getLovers().remove(lastProfile);
+            } catch (Exception e) {
+                log.info("Возлюбленный {} юзера {} не удален из кэша", lastProfile, userId);
+            }
+            serverController.removeLover(userId, lastProfile);
+
+            newLastId(userId, lastProfile);
+        } else if (buttonQuery.getData().equals("buttonLike")) {
+            userDataCache.setUsersCurrentBotState(userId, BotState.NEXT);
+            User user = userDataCache.getUserProfileData(userId);
+            Long lastProfile = userDataCache.getLastSearchIdForUser(userId);
+            try {
+                User lover = userDataCache.getUserProfilesForSearch(userId).get(lastProfile);
+                user.getLovers().put(lastProfile, lover);
+                serverController.addNewLover(userId, lastProfile);
+            } catch (Exception e) {
+                log.info("Ошибка при добавлении Возлюбленного {} юзера {} в список возлюбленных",
+                        userId, lastProfile);
+            }
+
+            newLastId(userId, lastProfile);
+        } else if (buttonQuery.getData().equals("buttonMenu")) {
+            removeCacheSearch(userId);
+            userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
         } else {
             userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
         }
 
         return callBackAnswer;
+    }
+
+    private void removeCacheSearch(long userId) {
+        try {
+            userDataCache.getUserProfilesForSearch(userId).remove(userId);
+            userDataCache.removeLastProfile(userId);
+        }catch (NullPointerException ignored){
+        }
+    }
+
+    private void newLastId(long userId, Long lastProfile) {
+        if (lastProfile != null) {
+            Long nextProfile = userDataCache.getUserProfilesForSearch(userId).higherKey(lastProfile);
+            userDataCache.setUsersLastElementForSearch(userId, nextProfile);
+        }
     }
 
     private AnswerCallbackQuery sendAnswerCallbackQuery(String text, boolean alert, CallbackQuery callbackquery) {
@@ -79,7 +141,13 @@ public class TelegramFacade {
 
 
     private BotApiMethod<?> handleInputMessage(Update update, Bot bot) {
-        long userId = getUserId(update);
+        long userId;
+        try {
+            userId = getUserId(update);
+        }catch (NullPointerException e){
+            return null;
+        }
+
         BotState botState = userDataCache.getUsersCurrentBotState(userId);
         BotApiMethod<?> replyMessage;
         Message message = update.getMessage();
@@ -107,6 +175,8 @@ public class TelegramFacade {
                     break;
                 case "/search":
                     botState = BotState.SEARCH;
+                    removeCacheSearch(userId);
+                    break;
                 default:
                     botState = userDataCache.getUsersCurrentBotState(userId);
                     break;
@@ -114,11 +184,11 @@ public class TelegramFacade {
         }
         userDataCache.setUsersCurrentBotState(userId, botState);
         try {
-            replyMessage = botStateContext.processInputMessage(botState, update,userId,bot);
-        }catch (Exception e){
+            replyMessage = botStateContext.processInputMessage(botState, update, userId, bot);
+        } catch (Exception e) {
             userDataCache.removeUser(userId);
-            replyMessage = new SendMessage(String.valueOf(userId),"ошибка введите /start");
-            log.info("не удалось обработать запрос пользователя {}",userId);
+            replyMessage = new SendMessage(String.valueOf(userId), "ошибка введите /start");
+            log.info("не удалось обработать запрос пользователя {}", userId);
         }
 
         return replyMessage;
@@ -132,7 +202,8 @@ public class TelegramFacade {
         } else if (update.hasCallbackQuery()) {
             id = update.getCallbackQuery().getFrom().getId();
         }
-
+        if (id == null)
+        log.info("Не удалось получить userId update {}",update.getUpdateId());
         return id;
     }
 }

@@ -13,9 +13,11 @@ import ru.liga.client.service.ReplyMessagesService;
 import ru.liga.client.telegram.Bot;
 import ru.liga.client.telegram.botapi.BotState;
 import ru.liga.client.telegram.botapi.InputMessageHandler;
+import ru.liga.client.telegram.botapi.handlers.helper.ButtonHelper;
 import ru.liga.client.telegram.cache.UserDataCache;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -33,7 +35,7 @@ public class FillingProfileHandler implements InputMessageHandler {
 
     @Override
     public BotApiMethod<?> handle(Update update, long userId, Bot bot) {
-        return processUsersInput(update,userId);
+        return processUsersInput(update, userId);
     }
 
     @Override
@@ -44,8 +46,8 @@ public class FillingProfileHandler implements InputMessageHandler {
     private BotApiMethod<?> processUsersInput(Update update, long userId) {
         String usersAnswer = "";
         Message message = update.getMessage();
-        if (message != null && message.hasText()){
-            usersAnswer = message.getText().replaceAll("\n"," ");
+        if (message != null && message.hasText()) {
+            usersAnswer = message.getText().replaceAll("\n", " ");
         }
 
         User profileData = userDataCache.getUserProfileData(userId);
@@ -53,12 +55,11 @@ public class FillingProfileHandler implements InputMessageHandler {
 
         SendMessage replyToUser = null;
 
-        if (botState.equals(BotState.START)){
+        if (botState.equals(BotState.START)) {
             User user = serverController.getUserById(userId);
-            if (user==null){
+            if (user == null) {
                 botState = BotState.FILLING_PROFILE;
-            }
-            else {
+            } else {
                 replyToUser = getMessageWhenUserAlreadyExist(userId, user);
                 replyToUser.setReplyMarkup(getMenuButtonsMarkup());
                 return replyToUser;
@@ -67,7 +68,7 @@ public class FillingProfileHandler implements InputMessageHandler {
 
         if (botState.equals(BotState.FILLING_PROFILE)) {
             replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
-                    "reply.start","reply.askName");
+                    "reply.start", "reply.askName");
             profileData.setId(userId);
             userDataCache.setUsersCurrentBotState(userId, BotState.ASK_GENDER);
         }
@@ -84,13 +85,13 @@ public class FillingProfileHandler implements InputMessageHandler {
             replyToUser.setReplyMarkup(getGenderButtonsMarkup());
         }
 
-        if (botState.equals(BotState.ASK_HEAD)){
+        if (botState.equals(BotState.ASK_HEAD)) {
             replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askHead");
 //            profileData.setGender(usersAnswer);
             userDataCache.setUsersCurrentBotState(userId, BotState.ASK_DESC);
         }
 
-        if (botState.equals(BotState.ASK_DESC)){
+        if (botState.equals(BotState.ASK_DESC)) {
             replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askDesc");
             profileData.setHeading(usersAnswer);
             userDataCache.setUsersCurrentBotState(userId, BotState.FILLED_PROFILE);
@@ -99,6 +100,9 @@ public class FillingProfileHandler implements InputMessageHandler {
             profileData.setDescription(usersAnswer);
             userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
             serverController.saveNewUser(profileData);
+            botState = BotState.PRE_SEARCH;
+        }
+        if (botState.equals(BotState.PRE_SEARCH)){
             profileData = serverController.getUserById(userId);
 
             replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.help");
@@ -113,15 +117,16 @@ public class FillingProfileHandler implements InputMessageHandler {
     private SendMessage getMessageWhenUserAlreadyExist(long userId, User user) {
         SendMessage replyToUser;
         replyToUser = new SendMessage(String.valueOf(userId), String.format("%s %s \n%s",
-                        "Анкета уже была создана\nДанные по вашей анкете"
-                        , user
-                        , messagesService
+                "Анкета уже была создана\nДанные по вашей анкете"
+                , user
+                , messagesService
                         .getReplyMessage(String.valueOf(userId)
                                 , "reply.help").getText()));
         userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
         userDataCache.saveUserProfileData(userId, user);
         return replyToUser;
     }
+
     private InlineKeyboardMarkup getGenderButtonsMarkup() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         InlineKeyboardButton buttonGenderMan = new InlineKeyboardButton();
@@ -132,33 +137,31 @@ public class FillingProfileHandler implements InputMessageHandler {
         buttonGenderMan.setCallbackData("buttonMan");
         buttonGenderWoman.setCallbackData("buttonWoman");
 
-        return getInlineKeyboardMarkup(inlineKeyboardMarkup, buttonGenderMan, buttonGenderWoman);
+        return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, buttonGenderMan, buttonGenderWoman);
     }
 
-    private InlineKeyboardMarkup getMenuButtonsMarkup(){
+    private InlineKeyboardMarkup getMenuButtonsMarkup() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        InlineKeyboardButton buttonGenderMan = new InlineKeyboardButton();
-        InlineKeyboardButton buttonGenderWoman = new InlineKeyboardButton();
-        buttonGenderMan.setText("Профиль");
-        buttonGenderWoman.setText("Поиск");
+        InlineKeyboardButton profile = new InlineKeyboardButton();
+        InlineKeyboardButton search = new InlineKeyboardButton();
+        profile.setText("Профиль");
+        search.setText("Поиск");
         //Every button must have callBackData, or else not work !
-        buttonGenderMan.setCallbackData("buttonProfile");
-        buttonGenderWoman.setCallbackData("buttonSearch");
+        profile.setCallbackData("buttonProfile");
+        search.setCallbackData("buttonSearch");
 
-        return getInlineKeyboardMarkup(inlineKeyboardMarkup, buttonGenderMan, buttonGenderWoman);
+        return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, profile, search);
     }
 
-    private InlineKeyboardMarkup getInlineKeyboardMarkup(InlineKeyboardMarkup inlineKeyboardMarkup, InlineKeyboardButton buttonGenderMan, InlineKeyboardButton buttonGenderWoman) {
-        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-        keyboardButtonsRow1.add(buttonGenderMan);
-        keyboardButtonsRow1.add(buttonGenderWoman);
-
-        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        rowList.add(keyboardButtonsRow1);
-
-        inlineKeyboardMarkup.setKeyboard(rowList);
-
-        return inlineKeyboardMarkup;
-    }
+//    private InlineKeyboardMarkup getInlineKeyboardMarkup(InlineKeyboardMarkup inlineKeyboardMarkup,
+//                                                         InlineKeyboardButton... buttons) {
+//        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>(Arrays.asList(buttons));
+//        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+//        rowList.add(keyboardButtonsRow1);
+//
+//        inlineKeyboardMarkup.setKeyboard(rowList);
+//
+//        return inlineKeyboardMarkup;
+//    }
 
 }

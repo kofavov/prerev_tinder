@@ -1,6 +1,7 @@
 package ru.liga.server.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +10,7 @@ import ru.liga.server.service.UserService;
 
 import java.util.List;
 import java.util.Set;
-
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class MainController {
@@ -21,7 +22,10 @@ public class MainController {
 
     @GetMapping("/users")
     public List<User> getAll(){
-        return userService.getAll();
+        log.info("GET api/users");
+        List<User> users = userService.getAll();
+        log.info(users.toString());
+        return users;
     }
 
     @GetMapping("/users/{id}")

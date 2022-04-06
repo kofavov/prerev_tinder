@@ -11,9 +11,8 @@ public enum BotState {
     PRE_SEARCH,
     SHOW_PROFILE,
     SEARCH,
-    ALL,
-    MAN,
-    WOMEN,
+    CHOOSE_LOVERS_GENDER,
+    CHOSEN_LOVERS_GENDER,
     NEXT,
     BACK
 }

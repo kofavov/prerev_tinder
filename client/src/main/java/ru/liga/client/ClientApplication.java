@@ -18,29 +18,8 @@ import java.time.Duration;
 
 @SpringBootApplication
 public class ClientApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(ClientApplication.class);
 
     }
-//    @Bean
-//    public Bot bot(@Value("${telegram.name}") String name
-//            ,@Value("${telegram.token}")String token,
-//                   @Value("${telegram.webHookPath}")String webHookPath){
-//        Bot bot = new Bot(name, token,webHookPath);
-//        try {
-//            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-//            botsApi.registerBot(bot);
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-//        return bot;
-//    }
-//    @Bean
-//    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-//        return builder
-//                .setConnectTimeout(Duration.ofSeconds(1))
-//                .setReadTimeout(Duration.ofSeconds(2))
-//                .build();
-//    }
 }

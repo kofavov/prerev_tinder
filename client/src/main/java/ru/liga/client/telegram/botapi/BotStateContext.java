@@ -28,8 +28,22 @@ public class BotStateContext {
         if (isFillingProfileState(currentState)) {
             return messageHandlers.get(BotState.START);
         }
+        if (isSearch(currentState)){
+            return messageHandlers.get(BotState.SEARCH);
+        }
 
         return messageHandlers.get(currentState);
+    }
+
+    private boolean isSearch(BotState currentState) {
+        switch (currentState){
+            case SEARCH:
+            case CHOOSE_LOVERS_GENDER:
+            case CHOSEN_LOVERS_GENDER:
+            case NEXT:
+                return true;
+            default:return false;
+        }
     }
 
     private boolean isFillingProfileState(BotState currentState) {
@@ -41,6 +55,7 @@ public class BotStateContext {
             case ASK_DESC:
             case FILLING_PROFILE:
             case FILLED_PROFILE:
+            case PRE_SEARCH:
                 return true;
             default:
                 return false;

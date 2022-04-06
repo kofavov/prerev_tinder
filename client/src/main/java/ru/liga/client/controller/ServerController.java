@@ -11,9 +11,10 @@ import ru.liga.client.entity.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -36,7 +37,7 @@ public class ServerController {
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(user.toJson(), httpHeaders);
-//        System.out.println(entity);
+
         ResponseEntity<HttpStatus> response = restTemplate.exchange(urlResource, HttpMethod.POST, entity, HttpStatus.class);
     }
 
@@ -86,4 +87,51 @@ public class ServerController {
         }
     }
 
+    public Map<Long, User> getAllWithFilter(Predicate<? super User> filter) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
+        User[] users = null;
+        Map<Long,User> usersMap = new HashMap<>();
+        try {
+            ResponseEntity<User[]> response = restTemplate.exchange(urlResource
+                    , HttpMethod.GET, entity, User[].class);
+            users = response.getBody();
+            if (users!=null) {
+                usersMap = Arrays.stream(response.getBody()).filter(filter)
+                        .collect(Collectors.toMap(User::getId, user->user));
+            }
+            log.info("getAllwithfilter\n{}",usersMap);
+        } catch (RestClientException e) {
+            log.info("Данных о пользователях нет (поисковый запрос с фильтром {})", filter);
+        }
+        return usersMap;
+
+    }
+
+    public void removeLover(long userId, Long lastProfile) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
+        try {
+            restTemplate.delete(urlResource + "/lovers/" + userId + "/" + lastProfile);
+        } catch (RestClientException e) {
+            log.info("Возлюбленный {} юзера {} не удален из бд",lastProfile,userId);
+        }
+    }
+
+    public void addNewLover(long userId,Long lastProfile){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<String>(httpHeaders);
+
+        String url = urlResource + "/lovers/" + userId + "/" + lastProfile;
+        try {
+            restTemplate.exchange(url, HttpMethod.POST,
+                    entity, HttpStatus.class);
+        } catch (RestClientException e) {
+            log.info("Возлюбленный {} юзера {} не добавлен в бд",userId,lastProfile);
+        }
+    }
 }
