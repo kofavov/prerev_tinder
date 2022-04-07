@@ -2,10 +2,9 @@ package ru.liga.client.telegram.cache;
 
 import org.springframework.stereotype.Component;
 import ru.liga.client.entity.User;
-import ru.liga.client.telegram.botapi.BotState;
+import ru.liga.client.telegram.botapi.botstate.BotState;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -13,9 +12,9 @@ import java.util.TreeMap;
 public class UserDataCache implements DataCache {
     private final Map<Long, BotState> usersBotStates = new HashMap<>();
     private final Map<Long, User> usersProfileData = new HashMap<>();
-    private final Map<Long,Long> usersLastWatchedProfile = new HashMap<>();
-    private final Map<Long, TreeMap<Long,User>> usersProfilesForSearch = new HashMap<>();
-    private final Map<Long,Long> usersLastLoverProfile = new HashMap<>();
+    private final Map<Long, Long> usersLastWatchedProfile = new HashMap<>();
+    private final Map<Long, TreeMap<Long, User>> usersProfilesForSearch = new HashMap<>();
+    private final Map<Long, Long> usersLastLoverProfile = new HashMap<>();
     private final Map<Long, TreeMap<Long, User>> usersLoversData = new HashMap<>();
 
     @Override
@@ -59,13 +58,13 @@ public class UserDataCache implements DataCache {
 
     @Override
     public void fillUsersProfilesForSearch(long userId, Map<Long, User> profileForSearch) {
-        usersProfilesForSearch.put(userId,new TreeMap<>(profileForSearch));
+        usersProfilesForSearch.put(userId, new TreeMap<>(profileForSearch));
         usersProfilesForSearch.get(userId).remove(userId);
     }
 
     @Override
     public void setUsersLastElementForSearch(long userId, Long lastSearchId) {
-        usersLastWatchedProfile.put(userId,lastSearchId);
+        usersLastWatchedProfile.put(userId, lastSearchId);
     }
 
     @Override
@@ -90,7 +89,7 @@ public class UserDataCache implements DataCache {
 
     @Override
     public void fillUserLoversData(long userId, Map<Long, User> profileForSearch) {
-        usersLoversData.put(userId,new TreeMap<>(profileForSearch));
+        usersLoversData.put(userId, new TreeMap<>(profileForSearch));
         usersLoversData.get(userId).remove(userId);
     }
 

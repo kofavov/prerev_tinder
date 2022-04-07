@@ -1,11 +1,8 @@
 package ru.liga.client.telegram.cache;
 
-import com.google.common.io.LittleEndianDataOutputStream;
 import ru.liga.client.entity.User;
-import ru.liga.client.telegram.botapi.BotState;
+import ru.liga.client.telegram.botapi.botstate.BotState;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 

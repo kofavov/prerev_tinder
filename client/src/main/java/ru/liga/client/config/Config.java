@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import ru.liga.client.controller.ServerController;
 import ru.liga.client.telegram.Bot;
-import ru.liga.client.telegram.botapi.TelegramFacade;
+import ru.liga.client.telegram.botapi.telegramfacade.TelegramFacade;
 
 @Setter
 @Getter

@@ -1,5 +1,6 @@
 package ru.liga.client.telegram.botapi.handlers;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,8 +12,7 @@ import ru.liga.client.controller.ServerController;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ReplyMessagesService;
 import ru.liga.client.telegram.Bot;
-import ru.liga.client.telegram.botapi.BotState;
-import ru.liga.client.telegram.botapi.InputMessageHandler;
+import ru.liga.client.telegram.botapi.botstate.BotState;
 import ru.liga.client.telegram.botapi.handlers.helper.ButtonHelper;
 import ru.liga.client.telegram.cache.UserDataCache;
 
@@ -21,16 +21,18 @@ public class FillingProfileHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final ReplyMessagesService messagesService;
     private final ServerController serverController;
+    private final Bot bot;
 
-    public FillingProfileHandler(UserDataCache userDataCache,
-                                 ReplyMessagesService messagesService, ServerController serverController) {
+    public FillingProfileHandler(UserDataCache userDataCache, ReplyMessagesService messagesService,
+                                 ServerController serverController,@Lazy Bot bot) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
         this.serverController = serverController;
+        this.bot = bot;
     }
 
     @Override
-    public BotApiMethod<?> handle(Update update, long userId, Bot bot) {
+    public BotApiMethod<?> handle(Update update, long userId) {
         return processUsersInput(update, userId);
     }
 
@@ -40,11 +42,7 @@ public class FillingProfileHandler implements InputMessageHandler {
     }
 
     private BotApiMethod<?> processUsersInput(Update update, long userId) {
-        String usersAnswer = "";
-        Message message = update.getMessage();
-        if (message != null && message.hasText()) {
-            usersAnswer = message.getText().replaceAll("\n", " ");
-        }
+        String usersAnswer = getUsersAnswer(update);
 
         User profileData = userDataCache.getUserProfileData(userId);
         BotState botState = userDataCache.getUsersCurrentBotState(userId);
@@ -63,40 +61,26 @@ public class FillingProfileHandler implements InputMessageHandler {
         }
 
         if (botState.equals(BotState.FILLING_PROFILE)) {
-            replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
-                    "reply.start", "reply.askName");
-            profileData.setId(userId);
-            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_GENDER);
+            replyToUser = startFillingProfile(userId, profileData);
         }
 
         if (botState.equals(BotState.ASK_NAME)) {
-            replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
-                    "reply.askName");
-            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_GENDER);
+            replyToUser = askName(userId);
         }
 
         if (botState.equals(BotState.ASK_GENDER)) {
-            replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askGender");
-            profileData.setName(usersAnswer);
-            replyToUser.setReplyMarkup(getGenderButtonsMarkup());
+            replyToUser = askGender(userId, usersAnswer, profileData);
         }
 
         if (botState.equals(BotState.ASK_HEAD)) {
-            replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askHead");
-//            profileData.setGender(usersAnswer);
-            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_DESC);
+            replyToUser = askHead(userId);
         }
 
         if (botState.equals(BotState.ASK_DESC)) {
-            replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askDesc");
-            profileData.setHeading(usersAnswer);
-            userDataCache.setUsersCurrentBotState(userId, BotState.FILLED_PROFILE);
+            replyToUser = askDesk(userId, usersAnswer, profileData);
         }
         if (botState.equals(BotState.FILLED_PROFILE)) {
-            profileData.setDescription(usersAnswer);
-            userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
-            serverController.saveNewUser(profileData);
-            botState = BotState.PRE_SEARCH;
+            botState = filledProfile(userId, usersAnswer, profileData);
         }
         if (botState.equals(BotState.PRE_SEARCH)) {
             profileData = serverController.getUserById(userId);
@@ -108,6 +92,65 @@ public class FillingProfileHandler implements InputMessageHandler {
         userDataCache.saveUserProfileData(userId, profileData);
 
         return replyToUser;
+    }
+
+    private String getUsersAnswer(Update update) {
+        String usersAnswer = "";
+        Message message = update.getMessage();
+        if (message != null && message.hasText()) {
+            usersAnswer = message.getText().replaceAll("\n", " ");
+        }
+        return usersAnswer;
+    }
+
+    private SendMessage startFillingProfile(long userId, User profileData) {
+        SendMessage replyToUser;
+        replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
+                "reply.start", "reply.askName");
+        profileData.setId(userId);
+        userDataCache.setUsersCurrentBotState(userId, BotState.ASK_GENDER);
+        return replyToUser;
+    }
+
+    private SendMessage askName(long userId) {
+        SendMessage replyToUser;
+        replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
+                "reply.askName");
+        userDataCache.setUsersCurrentBotState(userId, BotState.ASK_GENDER);
+        return replyToUser;
+    }
+
+    private SendMessage askGender(long userId, String usersAnswer, User profileData) {
+        SendMessage replyToUser;
+        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askGender");
+        profileData.setName(usersAnswer);
+        replyToUser.setReplyMarkup(getGenderButtonsMarkup());
+        return replyToUser;
+    }
+
+    private SendMessage askHead(long userId) {
+        SendMessage replyToUser;
+        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askHead");
+//            profileData.setGender(usersAnswer);
+        userDataCache.setUsersCurrentBotState(userId, BotState.ASK_DESC);
+        return replyToUser;
+    }
+
+    private SendMessage askDesk(long userId, String usersAnswer, User profileData) {
+        SendMessage replyToUser;
+        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askDesc");
+        profileData.setHeading(usersAnswer);
+        userDataCache.setUsersCurrentBotState(userId, BotState.FILLED_PROFILE);
+        return replyToUser;
+    }
+
+    private BotState filledProfile(long userId, String usersAnswer, User profileData) {
+        BotState botState;
+        profileData.setDescription(usersAnswer);
+        userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
+        serverController.saveNewUser(profileData);
+        botState = BotState.PRE_SEARCH;
+        return botState;
     }
 
     private SendMessage getMessageWhenUserAlreadyExist(long userId, User user) {
@@ -152,16 +195,4 @@ public class FillingProfileHandler implements InputMessageHandler {
 
         return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, profile, search, lovers);
     }
-
-//    private InlineKeyboardMarkup getInlineKeyboardMarkup(InlineKeyboardMarkup inlineKeyboardMarkup,
-//                                                         InlineKeyboardButton... buttons) {
-//        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>(Arrays.asList(buttons));
-//        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-//        rowList.add(keyboardButtonsRow1);
-//
-//        inlineKeyboardMarkup.setKeyboard(rowList);
-//
-//        return inlineKeyboardMarkup;
-//    }
-
 }

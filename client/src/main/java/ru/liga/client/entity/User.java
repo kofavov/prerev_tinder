@@ -1,10 +1,12 @@
 package ru.liga.client.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 @Getter
 @Setter
@@ -21,8 +23,8 @@ public class User {
     private String heading;
     @JsonProperty("description")
     private String description;
-    private HashMap<Long,User> lovers = new HashMap<>();
-    private HashMap<Long,User> loved = new HashMap<>();
+    private HashMap<Long, User> lovers = new HashMap<>();
+    private HashMap<Long, User> loved = new HashMap<>();
 
     public User(Long id, String name, String gender, String heading, String description) {
         this.id = id;
@@ -34,7 +36,7 @@ public class User {
 
     @Override
     public String toString() {
-        return heading  + " " + description;
+        return heading + " " + description;
 
     }
 
@@ -42,7 +44,7 @@ public class User {
         return "{" +
                 "\"id\":" + id + ", " +
                 "\"name\":\"" + name + "\", " +
-                "\"heading\":\""+ heading + "\", " +
+                "\"heading\":\"" + heading + "\", " +
                 "\"gender\":\"" + gender + "\", " +
                 "\"description\":\"" + description + "\"}";
     }

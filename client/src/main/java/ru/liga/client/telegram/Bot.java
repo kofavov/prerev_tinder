@@ -1,14 +1,13 @@
 package ru.liga.client.telegram;
 
 
-import lombok.SneakyThrows;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.liga.client.telegram.botapi.TelegramFacade;
+import ru.liga.client.telegram.botapi.telegramfacade.TelegramFacade;
 
 
 public class Bot extends TelegramWebhookBot {
@@ -28,7 +27,7 @@ public class Bot extends TelegramWebhookBot {
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        return telegramFacade.handleUpdate(update, this);
+        return telegramFacade.handleUpdate(update);
     }
 
     public void sendImage(SendPhoto message) {
@@ -39,13 +38,15 @@ public class Bot extends TelegramWebhookBot {
         }
     }
 
-    public void sendMessage(SendMessage message){
+    public void sendMessage(SendMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-    };
+    }
+
+    ;
 
     @Override
     public String getBotUsername() {

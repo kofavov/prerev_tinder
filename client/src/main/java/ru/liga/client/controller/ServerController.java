@@ -1,11 +1,9 @@
 package ru.liga.client.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.liga.client.entity.User;
@@ -37,11 +35,12 @@ public class ServerController {
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(user.toJson(), httpHeaders);
-
+        log.info("Сохранение пользователя {}", user.getId());
         ResponseEntity<HttpStatus> response = restTemplate.exchange(urlResource, HttpMethod.POST, entity, HttpStatus.class);
     }
 
     public User getUserById(long id) {
+        log.info("get user id = {}", id);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
@@ -50,18 +49,21 @@ public class ServerController {
         try {
             ResponseEntity<User> response = restTemplate.exchange(url, HttpMethod.GET, entity, User.class);
             user = response.getBody();
+
+
         } catch (RestClientException e) {
             log.info("Данных о пользователе с id {} нет", id);
         }
         if (user != null) {
-            fillLoversMap(id,  user);
-            fillLovedMap(id,  user);
+            fillLoversMap(id, user);
+            fillLovedMap(id, user);
         }
 
         return user;
     }
 
-    public void fillLovedMap(long id,User user) {
+    public void fillLovedMap(long id, User user) {
+        log.info("fillLovedMap userid {} ", id);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
@@ -78,6 +80,7 @@ public class ServerController {
     }
 
     public void fillLoversMap(long id, User user) {
+        log.info("fillLoversMap userid {} ", id);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
@@ -98,16 +101,16 @@ public class ServerController {
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
         User[] users = null;
-        Map<Long,User> usersMap = new HashMap<>();
+        Map<Long, User> usersMap = new HashMap<>();
         try {
             ResponseEntity<User[]> response = restTemplate.exchange(urlResource
                     , HttpMethod.GET, entity, User[].class);
             users = response.getBody();
-            if (users!=null) {
+            if (users != null) {
                 usersMap = Arrays.stream(response.getBody()).filter(filter)
-                        .collect(Collectors.toMap(User::getId, user->user));
+                        .collect(Collectors.toMap(User::getId, user -> user));
             }
-            log.info("getAllwithfilter\n{}",usersMap);
+            log.info("getAllwithfilter\n{}", usersMap);
         } catch (RestClientException e) {
             log.info("Данных о пользователях нет (поисковый запрос с фильтром {})", filter);
         }
@@ -116,17 +119,19 @@ public class ServerController {
     }
 
     public void removeLover(long userId, Long lastProfile) {
+        log.info("Удаление Возлюбленного {} юзера {} из бд", lastProfile, userId);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
         try {
             restTemplate.delete(urlResource + "/lovers/" + userId + "/" + lastProfile);
         } catch (RestClientException e) {
-            log.info("Возлюбленный {} юзера {} не удален из бд",lastProfile,userId);
+            log.info("Возлюбленный {} юзера {} не удален из бд", lastProfile, userId);
         }
     }
 
-    public void addNewLover(long userId,Long lastProfile){
+    public void addNewLover(long userId, Long lastProfile) {
+        log.info("Добавление Возлюбленного {} юзера {} в бд", lastProfile, userId);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -137,7 +142,7 @@ public class ServerController {
             restTemplate.exchange(url, HttpMethod.POST,
                     entity, HttpStatus.class);
         } catch (RestClientException e) {
-            log.info("Возлюбленный {} юзера {} не добавлен в бд",userId,lastProfile);
+            log.info("Возлюбленный {} юзера {} не добавлен в бд", userId, lastProfile);
         }
     }
 }

@@ -1,4 +1,4 @@
-package ru.liga.client.telegram.botapi;
+package ru.liga.client.telegram.botapi.botstate;
 
 public enum BotState {
     START,

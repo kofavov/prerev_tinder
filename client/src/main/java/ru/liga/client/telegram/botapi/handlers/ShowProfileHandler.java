@@ -1,5 +1,6 @@
 package ru.liga.client.telegram.botapi.handlers;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,8 +12,7 @@ import ru.liga.client.entity.User;
 import ru.liga.client.service.ImageService;
 import ru.liga.client.service.ReplyMessagesService;
 import ru.liga.client.telegram.Bot;
-import ru.liga.client.telegram.botapi.BotState;
-import ru.liga.client.telegram.botapi.InputMessageHandler;
+import ru.liga.client.telegram.botapi.botstate.BotState;
 import ru.liga.client.telegram.cache.UserDataCache;
 
 import java.io.File;
@@ -23,22 +23,24 @@ public class ShowProfileHandler implements InputMessageHandler {
     private final ReplyMessagesService messagesService;
     private final ServerController serverController;
     private final ImageService imageService;
+    private final Bot bot;
 
     public ShowProfileHandler(UserDataCache userDataCache
             , ReplyMessagesService messagesService
             , ServerController serverController
-            , ImageService imageService) {
+            , ImageService imageService,@Lazy Bot bot) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
         this.serverController = serverController;
         this.imageService = imageService;
+        this.bot = bot;
     }
 
     @Override
-    public BotApiMethod<?> handle(Update update, long userId, Bot bot) {
-        return processUsersInput(update, userId,bot);
+    public BotApiMethod<?> handle(Update update, long userId) {
+        return processUsersInput(update, userId);
     }
-    private BotApiMethod<?> processUsersInput(Update update, long userId, Bot bot) {
+    private BotApiMethod<?> processUsersInput(Update update, long userId) {
         User user = userDataCache.getUserProfileData(userId);
         if (user.getId() == null){
             user = serverController.getUserById(userId);

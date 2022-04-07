@@ -1,10 +1,8 @@
 package ru.liga.client.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 import ru.liga.client.entity.User;
 
 import javax.imageio.ImageIO;
@@ -12,8 +10,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,10 +73,10 @@ public class ImageService {
     private List<String> getLinesToWrite(User user, Graphics graphics, int maxLineWidth, Font header, Font body) {
         FontMetrics fontMetrics = graphics.getFontMetrics(header);
         List<String> linesToWrite = new ArrayList<>();
-        String head = user.getHeading()+".";
-        linesToWrite.add(head.replace(".","")
-                .replaceAll("\\s.*",""));
-        String preDescript = head.replaceAll("^\\S*\\s?","") + " " + user.getDescription();
+        String head = user.getHeading() + ".";
+        linesToWrite.add(head.replace(".", "")
+                .replaceAll("\\s.*", ""));
+        String preDescript = head.replaceAll("^\\S*\\s?", "") + " " + user.getDescription();
         String[] description = preDescript.split("\\s");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < description.length; ) {
