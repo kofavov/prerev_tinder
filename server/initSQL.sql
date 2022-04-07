@@ -19,24 +19,25 @@
 -- ALTER TABLE public.users
 --     OWNER to postgres;
 
-CREATE TABLE IF NOT EXISTS public.users
+create table if not exists users
 (
-    id integer NOT NULL,
-    name character varying COLLATE pg_catalog."default" NOT NULL,
-    gender character varying COLLATE pg_catalog."default" NOT NULL,
-    heading character varying COLLATE pg_catalog."default" NOT NULL,
-    description character varying COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT users_pkey PRIMARY KEY (id)
-)
+    id integer not null
+        constraint users_pkey
+            primary key,
+    name varchar not null,
+    gender varchar not null,
+    heading varchar not null,
+    description varchar not null
+);
 
-    TABLESPACE pg_default;
+alter table users owner to postgres;
 
-create table lovers
+create table if not exists lovers
 (
-    user_id       integer not null
+    user_id integer not null
         constraint user_id
             references users,
-    lover_id      integer not null
+    lover_id integer not null
         constraint lover_id
             references users,
     user_lover_id serial
@@ -46,8 +47,7 @@ create table lovers
         unique (lover_id, user_id)
 );
 
-alter table lovers
-    owner to postgres;
+alter table lovers owner to postgres;
 
-create unique index lovers_user_lover_id_uindex
+create unique index if not exists lovers_user_lover_id_uindex
     on lovers (user_lover_id);

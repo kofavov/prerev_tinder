@@ -30,16 +30,20 @@ public class TelegramFacade {
     public BotApiMethod<?> handleUpdate(Update update) {
         log.info(update.getUpdateId().toString());
         BotApiMethod<?> replyMessage = null;
+        try {
 
-        if (update.hasCallbackQuery()) {
-            CallbackQuery callbackQuery = update.getCallbackQuery();
-            log.info("CallbackQuery from User {} CQ {}"
-                    , callbackQuery.getFrom().getId(), callbackQuery.getData());
+            if (update.hasCallbackQuery()) {
+                CallbackQuery callbackQuery = update.getCallbackQuery();
+                log.info("CallbackQuery from User {} CQ {}"
+                        , callbackQuery.getFrom().getId(), callbackQuery.getData());
 
-            processCallBackQuery(callbackQuery);
+                processCallBackQuery(callbackQuery);
+            }
+
+            replyMessage = handleInputMessage(update);
+        }catch (Exception e){
+            log.info("Ошибка Update {}",update.getUpdateId());
         }
-
-        replyMessage = handleInputMessage(update);
 
         return replyMessage;
     }

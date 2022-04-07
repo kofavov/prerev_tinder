@@ -30,6 +30,7 @@ public class MainController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") long id){
+        log.info("getUserById {}",id);
         ResponseEntity<User> response;
         try {
             response = new ResponseEntity<>(userService.getUserById(id),HttpStatus.OK);
@@ -42,32 +43,37 @@ public class MainController {
 
     @PostMapping("/users")
     public void saveNewUser(@RequestBody User user) {
-        System.out.println(user);
+        log.info("saveNewUser {}",user.toString());
         userService.saveNewUser(user);
     }
 
     @PutMapping("/users")
     public void updateUser(@RequestBody User user){
+        log.info("updateUser {}",user.toString());
         userService.updateUser(user);
     }
     @DeleteMapping("/users/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") long id){
+        log.info("deleteUserById {}",id);
         userService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @GetMapping("/users/lovers/{id}")
     public Set<User> getLoversById(@PathVariable("id") long id){
+        log.info("getLoversById {}",id);
         return userService.getLovers(id);
     }
 
     @GetMapping("/users/loved/{id}")
     public Set<User> getLovedThisById(@PathVariable("id")long id){
+        log.info("getLovedById {}",id);
         return userService.getLovedThisById(id);
     }
 
     @PostMapping("/users/lovers/{user_id}/{lover_id}")
     public ResponseEntity<HttpStatus> addNewLover(@PathVariable("user_id") long user_id,
                                       @PathVariable("lover_id") long lover_id){
+        log.info("addNewLover userId {}, loverId {}",user_id,lover_id);
         userService.addNewLover(user_id, lover_id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -75,6 +81,7 @@ public class MainController {
     @DeleteMapping("/users/lovers/{user_id}/{lover_id}")
     public ResponseEntity<HttpStatus> deleteLover(@PathVariable("user_id") long user_id,
                                                   @PathVariable("lover_id") long lover_id){
+        log.info("deleteLover userId {} loverId {}",user_id,lover_id);
         userService.deleteLoverById(user_id,lover_id);
         return new ResponseEntity<>(HttpStatus.OK);
     }

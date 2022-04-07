@@ -1,5 +1,6 @@
 package ru.liga.server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.liga.server.entity.User;
 import ru.liga.server.repository.UserRepository;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final Translator translator;
@@ -40,11 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(User user) {
-        user.setName(translator.translate(user.getName()));
-        user.setHeading(translator.translate(user.getHeading()));
-        user.setDescription(translator.translate(user.getDescription()));
-
-        userRepository.save(user);
+       saveNewUser(user);
     }
 
     @Override
@@ -52,12 +50,12 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.deleteUserInLovers(id);
         } catch (Exception ignored) {
-
+            log.debug("ошибка при удалении user {} из lovers",id);
         }
         try {
             userRepository.delete(getUserById(id));
         }catch (Exception ignored){
-
+            log.debug("ошибка при удалении user {}",id);
         }
     }
 
@@ -66,21 +64,18 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.deleteLoversById(user_id,lover_id);
         } catch (Exception ignored) {
-
+            log.debug("Service deleteLoverById ({},{})",user_id,lover_id);
         }
     }
-
 
     @Override
     public Set<User> getLovers(long id) {
         return userRepository.findAllLoversById(id);
-//        return getUserById(id).getThisLovers();
     }
 
     @Override
     public Set<User> getLovedThisById(long id) {
         return userRepository.findAllLovedById(id);
-//        return getUserById(id).getLovedThis();
     }
 
     @Override
@@ -88,7 +83,7 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.saveNewLover(user_id,lover_id);
         }catch (Exception ignore){
-
+            log.debug("addNewLover ({},{})",user_id,lover_id);
         }
     }
 }
