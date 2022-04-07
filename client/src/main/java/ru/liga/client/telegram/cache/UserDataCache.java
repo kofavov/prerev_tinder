@@ -15,6 +15,8 @@ public class UserDataCache implements DataCache {
     private final Map<Long, User> usersProfileData = new HashMap<>();
     private final Map<Long,Long> usersLastWatchedProfile = new HashMap<>();
     private final Map<Long, TreeMap<Long,User>> usersProfilesForSearch = new HashMap<>();
+    private final Map<Long,Long> usersLastLoverProfile = new HashMap<>();
+    private final Map<Long, TreeMap<Long, User>> usersLoversData = new HashMap<>();
 
     @Override
     public void setUsersCurrentBotState(long userId, BotState botState) {
@@ -51,6 +53,8 @@ public class UserDataCache implements DataCache {
         usersBotStates.remove(userId);
         usersProfilesForSearch.remove(userId);
         usersLastWatchedProfile.remove(userId);
+        usersLoversData.remove(userId);
+        usersLastLoverProfile.remove(userId);
     }
 
     @Override
@@ -75,8 +79,34 @@ public class UserDataCache implements DataCache {
     }
 
     @Override
-    public void removeLastProfile(Long userId) {
+    public void removeLastSearchProfile(Long userId) {
         usersLastWatchedProfile.remove(userId);
+    }
+
+    @Override
+    public void setUsersLastLover(long userId, Long lastLoversId) {
+        usersLastLoverProfile.put(userId, lastLoversId);
+    }
+
+    @Override
+    public void fillUserLoversData(long userId, Map<Long, User> profileForSearch) {
+        usersLoversData.put(userId,new TreeMap<>(profileForSearch));
+        usersLoversData.get(userId).remove(userId);
+    }
+
+    @Override
+    public Long getLastLoverId(long userId) {
+        return usersLastLoverProfile.get(userId);
+    }
+
+    @Override
+    public TreeMap<Long, User> getUserLoversData(long userId) {
+        return usersLoversData.get(userId);
+    }
+
+    @Override
+    public void removeLastLoverProfile(long userId) {
+        usersLastLoverProfile.remove(userId);
     }
 
 

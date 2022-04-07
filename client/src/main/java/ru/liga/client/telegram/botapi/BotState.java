@@ -14,5 +14,9 @@ public enum BotState {
     CHOOSE_LOVERS_GENDER,
     CHOSEN_LOVERS_GENDER,
     NEXT,
-    BACK
+    BACK,
+    LOVERS,
+    CHOSEN_IN_LOVERS_MENU,
+    NEXT_LOVERS,
+    BACK_LOVERS
 }

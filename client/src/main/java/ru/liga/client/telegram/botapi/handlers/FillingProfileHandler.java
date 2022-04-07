@@ -16,10 +16,6 @@ import ru.liga.client.telegram.botapi.InputMessageHandler;
 import ru.liga.client.telegram.botapi.handlers.helper.ButtonHelper;
 import ru.liga.client.telegram.cache.UserDataCache;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 @Component
 public class FillingProfileHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
@@ -102,7 +98,7 @@ public class FillingProfileHandler implements InputMessageHandler {
             serverController.saveNewUser(profileData);
             botState = BotState.PRE_SEARCH;
         }
-        if (botState.equals(BotState.PRE_SEARCH)){
+        if (botState.equals(BotState.PRE_SEARCH)) {
             profileData = serverController.getUserById(userId);
 
             replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.help");
@@ -144,13 +140,17 @@ public class FillingProfileHandler implements InputMessageHandler {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         InlineKeyboardButton profile = new InlineKeyboardButton();
         InlineKeyboardButton search = new InlineKeyboardButton();
+        InlineKeyboardButton lovers = new InlineKeyboardButton();
         profile.setText("Профиль");
         search.setText("Поиск");
+        lovers.setText("Любимцы");
+
         //Every button must have callBackData, or else not work !
         profile.setCallbackData("buttonProfile");
         search.setCallbackData("buttonSearch");
+        lovers.setCallbackData("buttonChooseLovers");
 
-        return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, profile, search);
+        return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, profile, search, lovers);
     }
 
 //    private InlineKeyboardMarkup getInlineKeyboardMarkup(InlineKeyboardMarkup inlineKeyboardMarkup,

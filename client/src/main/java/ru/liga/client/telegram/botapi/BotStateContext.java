@@ -2,8 +2,6 @@ package ru.liga.client.telegram.botapi;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.liga.client.telegram.Bot;
 
@@ -28,14 +26,17 @@ public class BotStateContext {
         if (isFillingProfileState(currentState)) {
             return messageHandlers.get(BotState.START);
         }
-        if (isSearch(currentState)){
+        if (isSearchState(currentState)){
             return messageHandlers.get(BotState.SEARCH);
+        }
+        if (isLoversState(currentState)){
+            return messageHandlers.get(BotState.LOVERS);
         }
 
         return messageHandlers.get(currentState);
     }
 
-    private boolean isSearch(BotState currentState) {
+    private boolean isSearchState(BotState currentState) {
         switch (currentState){
             case SEARCH:
             case CHOOSE_LOVERS_GENDER:
@@ -56,6 +57,18 @@ public class BotStateContext {
             case FILLING_PROFILE:
             case FILLED_PROFILE:
             case PRE_SEARCH:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isLoversState(BotState botState){
+        switch (botState){
+            case LOVERS:
+            case CHOSEN_IN_LOVERS_MENU:
+            case BACK_LOVERS:
+            case NEXT_LOVERS:
                 return true;
             default:
                 return false;

@@ -78,18 +78,21 @@ public class SearchHandler implements InputMessageHandler {
             }
 
             User currentProfile = searchUsers.get(lastProfileId);
-            File file = imageService.getFile(currentProfile);
-            InputFile inputFile = new InputFile(file);
-            bot.sendImage(SendPhoto.builder().photo(inputFile)
-                    .chatId(String.valueOf(userId)).build());
+            sendImage(userId, bot, currentProfile);
+
             String outputText = currentProfile.getGender() + ", " + currentProfile.getName();
             replyToUser = new SendMessage(String.valueOf(userId), outputText);
             replyToUser.setReplyMarkup(getNavigateButtons());
-
         }
 
-
         return replyToUser;
+    }
+
+    private void sendImage(long userId, Bot bot, User currentProfile) {
+        File file = imageService.getFile(currentProfile);
+        InputFile inputFile = new InputFile(file);
+        bot.sendImage(SendPhoto.builder().photo(inputFile)
+                .chatId(String.valueOf(userId)).build());
     }
 
     private ReplyKeyboard getNavigateButtons() {
@@ -100,6 +103,7 @@ public class SearchHandler implements InputMessageHandler {
         buttonDislike.setText("\uD83D\uDC4E");//dislike
         buttonLike.setText("❤");//like
         buttonMenu.setText("Меню");
+
         //Every button must have callBackData, or else not work !
         buttonDislike.setCallbackData("buttonDislike");
         buttonLike.setCallbackData("buttonLike");

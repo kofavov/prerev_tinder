@@ -23,7 +23,6 @@ public class Bot extends TelegramWebhookBot {
         this.token = token;
         this.webHookPath = webHookPath;
         this.telegramFacade = telegramFacade;
-
     }
 
 

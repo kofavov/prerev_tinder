@@ -1,10 +1,11 @@
 package ru.liga.client.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.liga.client.entity.User;
@@ -12,17 +13,16 @@ import ru.liga.client.entity.User;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.LinkedTransferQueue;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Controller
 public class ServerController {
     private final RestTemplate restTemplate;
-    private final String urlResource = "http://localhost:8080/api/users";
+    private final String urlResource;
 
-    public ServerController() {
+    public ServerController(String urlResource) {
+        this.urlResource = urlResource;
         RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
         this.restTemplate = restTemplateBuilder
                 .setConnectTimeout(Duration.ofSeconds(1))
@@ -54,14 +54,17 @@ public class ServerController {
             log.info("Данных о пользователе с id {} нет", id);
         }
         if (user != null) {
-            fillLoversMap(id, entity, user);
-            fillLovedMap(id, entity, user);
+            fillLoversMap(id,  user);
+            fillLovedMap(id,  user);
         }
 
         return user;
     }
 
-    private void fillLovedMap(long id, HttpEntity<String> entity, User user) {
+    public void fillLovedMap(long id,User user) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
         try {
             String urlLoved = urlResource + "/loved/" + id;
             HashMap<Long, User> lovedMap = user.getLoved();
@@ -74,7 +77,10 @@ public class ServerController {
         }
     }
 
-    private void fillLoversMap(long id, HttpEntity<String> entity, User user) {
+    public void fillLoversMap(long id, User user) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
         try {
             String urlLovers = urlResource + "/lovers/" + id;
             HashMap<Long, User> loversMap = user.getLovers();
