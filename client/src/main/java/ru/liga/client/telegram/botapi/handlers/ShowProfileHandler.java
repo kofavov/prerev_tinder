@@ -51,7 +51,8 @@ public class ShowProfileHandler implements InputMessageHandler {
         bot.sendImage(SendPhoto.builder().photo(inputFile)
                 .chatId(String.valueOf(userId)).build());
         userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
-        String outputText = user.getGender().getRus() + ", " + user.getName();
+        String outputText = user.getGender().getRus() + ", " + user.getName() +
+                "\n" + "Для заполнения анкеты заново введите /change" ;
         return new SendMessage(String.valueOf(userId), outputText);
     }
 

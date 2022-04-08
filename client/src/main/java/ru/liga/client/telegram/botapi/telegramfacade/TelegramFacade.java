@@ -57,6 +57,9 @@ public class TelegramFacade {
             case "/profile":
                 botState = BotState.SHOW_PROFILE;
                 break;
+            case "/change":
+                botState = BotState.ASK_NAME;
+                break;
             case "/search":
                 botState = BotState.SEARCH;
                 buttonHelper.removeCacheSearch(userId);
