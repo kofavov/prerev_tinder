@@ -1,6 +1,8 @@
 package ru.liga.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -16,9 +18,9 @@ import java.util.Set;
 @Getter
 @Setter
 @RequiredArgsConstructor
+
 public class User {
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
     @Column(name = "name", nullable = false)
@@ -30,25 +32,10 @@ public class User {
     private Gender gender;
     @Column(name = "description", nullable = false)
     private String description;
+    @Column(name = "find_gender",nullable = false)
+    @Enumerated(EnumType.STRING)
+    private FindGender find;
 
-//
-//    @ManyToMany(cascade = CascadeType.ALL)
-//    @JsonIgnoreProperties({"users"})
-//    @JoinTable(name = "lovers"
-//            , joinColumns = @JoinColumn(name = "user_id")
-//            , inverseJoinColumns = @JoinColumn(name = "lover_id"))
-//    private Set<User> thisLovers = new HashSet<>();
-
-//    @ManyToMany(cascade = CascadeType.ALL,mappedBy = "thisLovers")
-//    @JsonIgnoreProperties({"users}"})
-//    private Set<User> lovedThis = new HashSet<>();
-
-//    public void addLovers(User user){
-//        thisLovers.add(user);
-//    }
-//    public void removeLovers(User user){
-//        thisLovers.remove(user);
-//    }
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" +

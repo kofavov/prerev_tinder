@@ -59,11 +59,8 @@ public class SearchHandler implements InputMessageHandler {
 
         SendMessage replyToUser = null;
 
-        if (botState.equals(BotState.SEARCH)) {
-            replyToUser = search(userId);
-        }
 
-        if (botState.equals(BotState.CHOSEN_LOVERS_GENDER) ||
+        if (botState.equals(BotState.SEARCH) ||
                 botState.equals(BotState.NEXT)) {
             replyToUser = next(userId);
         }
@@ -79,13 +76,6 @@ public class SearchHandler implements InputMessageHandler {
         }
     }
 
-    private SendMessage search(long userId) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
-                "reply.chooseLoversGender");
-        replyToUser.setReplyMarkup(getGenderButtonsMarkup());
-        return replyToUser;
-    }
 
     private SendMessage next(long userId) {
         SendMessage replyToUser;
@@ -130,20 +120,4 @@ public class SearchHandler implements InputMessageHandler {
         return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, buttonDislike, buttonMenu, buttonLike);
     }
 
-
-    private InlineKeyboardMarkup getGenderButtonsMarkup() {
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        InlineKeyboardButton buttonGenderMan = new InlineKeyboardButton();
-        InlineKeyboardButton buttonGenderWoman = new InlineKeyboardButton();
-        InlineKeyboardButton buttonAll = new InlineKeyboardButton();
-        buttonGenderMan.setText("Сударя");
-        buttonGenderWoman.setText("Сударыню");
-        buttonAll.setText("Всех");
-
-        //Every button must have callBackData, or else not work !
-        buttonGenderMan.setCallbackData("buttonSearchMan");
-        buttonGenderWoman.setCallbackData("buttonSearchWoman");
-        buttonAll.setCallbackData("buttonSearchAll");
-        return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, buttonGenderMan, buttonGenderWoman, buttonAll);
-    }
 }

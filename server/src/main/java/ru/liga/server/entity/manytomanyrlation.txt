@@ -1,0 +1,25 @@
+Над классом поставить
+//@JsonIdentityInfo(
+//        generator = ObjectIdGenerators.PropertyGenerator.class,
+//        property = "id"
+//)
+
+
+//    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+//    @JoinTable(name = "lovers"
+//            , joinColumns = @JoinColumn(name = "user_id")
+//            , inverseJoinColumns = @JoinColumn(name = "lover_id"))
+//    private Set<User> thisLovers = new HashSet<>();
+//
+//    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JoinTable(name = "lovers"
+//            , joinColumns = @JoinColumn(name = "lover_id")
+//            , inverseJoinColumns = @JoinColumn(name = "user_id"))
+//    private Set<User> lovedThis = new HashSet<>();
+
+//    public void addLovers(User user){
+//        thisLovers.add(user);
+//    }
+//    public void removeLovers(User user){
+//        thisLovers.remove(user);
+//    }

@@ -11,10 +11,10 @@ import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
-    String queryGetLovers = "select id,name,heading,gender,description from users " +
+    String queryGetLovers = "select id,name,heading,gender,description,find_gender from users " +
             "inner join lovers l on users.id = l.lover_id " +
             "where user_id = ?1";
-    String queryGetLoved = "select id,name,heading,gender,description from users " +
+    String queryGetLoved = "select id,name,heading,gender,description,find_gender from users " +
             "inner join lovers l on users.id = l.user_id " +
             "where lover_id = ?1";
     String saveNewLover = "INSERT INTO lovers (user_id, lover_id)" +

@@ -23,6 +23,8 @@ public class User {
     private String heading;
     @JsonProperty("description")
     private String description;
+    @JsonProperty("find")
+    private FindGender find;
     private HashMap<Long, User> lovers = new HashMap<>();
     private HashMap<Long, User> loved = new HashMap<>();
 
@@ -46,6 +48,7 @@ public class User {
                 "\"name\":\"" + name + "\", " +
                 "\"heading\":\"" + heading + "\", " +
                 "\"gender\":\"" + gender + "\", " +
-                "\"description\":\"" + description + "\"}";
+                "\"description\":\"" + description + "\", " +
+                "\"find\":\"" + find + "\"}";
     }
 }

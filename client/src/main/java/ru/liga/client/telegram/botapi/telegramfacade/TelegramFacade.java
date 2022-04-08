@@ -54,18 +54,6 @@ public class TelegramFacade {
             case "/start":
                 botState = BotState.START;
                 break;
-            case "/name":
-                botState = BotState.ASK_NAME;
-                break;
-            case "/gender":
-                botState = BotState.ASK_GENDER;
-                break;
-            case "/head":
-                botState = BotState.ASK_HEAD;
-                break;
-            case "/desc":
-                botState = BotState.ASK_DESC;
-                break;
             case "/profile":
                 botState = BotState.SHOW_PROFILE;
                 break;
@@ -95,12 +83,6 @@ public class TelegramFacade {
             case "buttonWoman":
                 buttonHelper.buttonsChooseProfileGender(userId, "Сударыня");
                 break;
-            case "buttonProfile":
-                userDataCache.setUsersCurrentBotState(userId, BotState.SHOW_PROFILE);
-                break;
-            case "buttonSearch":
-                userDataCache.setUsersCurrentBotState(userId, BotState.SEARCH);
-                break;
             case "buttonSearchMan":
                 buttonHelper.buttonSearchChooseGender(userId, "Сударъ");
                 break;
@@ -109,6 +91,13 @@ public class TelegramFacade {
                 break;
             case "buttonSearchAll":
                 buttonHelper.buttonSearchAll(userId);
+                break;
+            case "buttonProfile":
+                userDataCache.setUsersCurrentBotState(userId, BotState.SHOW_PROFILE);
+                break;
+            case "buttonSearch":
+                buttonHelper.buttonSearch(userId);
+                userDataCache.setUsersCurrentBotState(userId, BotState.SEARCH);
                 break;
             case "buttonDislike":
                 buttonHelper.buttonDislike(userId);

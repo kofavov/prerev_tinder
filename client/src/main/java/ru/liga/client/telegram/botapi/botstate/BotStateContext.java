@@ -54,6 +54,7 @@ public class BotStateContext {
             case ASK_HEAD:
             case ASK_GENDER:
             case ASK_DESC:
+            case ASK_FIND_GENDER:
             case FILLING_PROFILE:
             case FILLED_PROFILE:
             case PRE_SEARCH:

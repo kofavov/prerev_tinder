@@ -79,6 +79,9 @@ public class FillingProfileHandler implements InputMessageHandler {
         if (botState.equals(BotState.ASK_DESC)) {
             replyToUser = askDesk(userId, usersAnswer, profileData);
         }
+        if(botState.equals(BotState.ASK_FIND_GENDER)){
+            replyToUser = askFindGender(userId,usersAnswer,profileData);
+        }
         if (botState.equals(BotState.FILLED_PROFILE)) {
             botState = filledProfile(userId, usersAnswer, profileData);
         }
@@ -140,13 +143,21 @@ public class FillingProfileHandler implements InputMessageHandler {
         SendMessage replyToUser;
         replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askDesc");
         profileData.setHeading(usersAnswer);
-        userDataCache.setUsersCurrentBotState(userId, BotState.FILLED_PROFILE);
+        userDataCache.setUsersCurrentBotState(userId, BotState.ASK_FIND_GENDER);
+        return replyToUser;
+    }
+
+    private SendMessage askFindGender(long userId, String usersAnswer, User profileData) {
+        SendMessage replyToUser;
+        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.chooseLoversGender");
+        profileData.setDescription(usersAnswer);
+        replyToUser.setReplyMarkup(getFindGenderButtonsMarkup());
         return replyToUser;
     }
 
     private BotState filledProfile(long userId, String usersAnswer, User profileData) {
         BotState botState;
-        profileData.setDescription(usersAnswer);
+//        profileData.setDescription(usersAnswer);
         userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
         serverController.saveNewUser(profileData);
         botState = BotState.PRE_SEARCH;
@@ -194,5 +205,20 @@ public class FillingProfileHandler implements InputMessageHandler {
         lovers.setCallbackData("buttonChooseLovers");
 
         return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, profile, search, lovers);
+    }
+    private InlineKeyboardMarkup getFindGenderButtonsMarkup() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        InlineKeyboardButton buttonGenderMan = new InlineKeyboardButton();
+        InlineKeyboardButton buttonGenderWoman = new InlineKeyboardButton();
+        InlineKeyboardButton buttonAll = new InlineKeyboardButton();
+        buttonGenderMan.setText("Сударя");
+        buttonGenderWoman.setText("Сударыню");
+        buttonAll.setText("Всех");
+
+        //Every button must have callBackData, or else not work !
+        buttonGenderMan.setCallbackData("buttonSearchMan");
+        buttonGenderWoman.setCallbackData("buttonSearchWoman");
+        buttonAll.setCallbackData("buttonSearchAll");
+        return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, buttonGenderMan, buttonGenderWoman, buttonAll);
     }
 }

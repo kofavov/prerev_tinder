@@ -6,6 +6,7 @@ public enum BotState {
     ASK_GENDER,
     ASK_HEAD,
     ASK_DESC,
+    ASK_FIND_GENDER,
     FILLING_PROFILE,
     FILLED_PROFILE,
     PRE_SEARCH,

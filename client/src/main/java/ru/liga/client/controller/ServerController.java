@@ -49,8 +49,6 @@ public class ServerController {
         try {
             ResponseEntity<User> response = restTemplate.exchange(url, HttpMethod.GET, entity, User.class);
             user = response.getBody();
-
-
         } catch (RestClientException e) {
             log.info("Данных о пользователе с id {} нет", id);
         }
