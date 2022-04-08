@@ -73,10 +73,12 @@ public class ImageService {
     private List<String> getLinesToWrite(User user, Graphics graphics, int maxLineWidth, Font header, Font body) {
         FontMetrics fontMetrics = graphics.getFontMetrics(header);
         List<String> linesToWrite = new ArrayList<>();
-        String head = user.getHeading() + ".";
-        linesToWrite.add(head.replace(".", "")
-                .replaceAll("\\s.*", ""));
-        String preDescript = head.replaceAll("^\\S*\\s?", "") + " " + user.getDescription();
+        String head = user.getHeading();
+        String heading = head.length()<20 ? head
+                : head.replace(".", "")
+                .replaceAll("\\s.*", "");
+        linesToWrite.add(heading);
+        String preDescript = head.replaceAll(heading + "\\S*\\s?", "") + " " + user.getDescription();
         String[] description = preDescript.split("\\s");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < description.length; ) {
