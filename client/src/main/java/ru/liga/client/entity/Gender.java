@@ -1,14 +1,13 @@
 package ru.liga.client.entity;
 
 public enum Gender {
-    Male("Сударъ"),Female("Сударыня");
-    String gender;
-    Gender(String gender) {
-        this.gender = gender;
+    MALE("Сударъ"),FEMALE("Сударыня");
+    String rus;
+    Gender(String rus) {
+        this.rus = rus;
     }
 
-    @Override
-    public String toString() {
-        return gender;
+    public String getRus() {
+        return rus;
     }
 }

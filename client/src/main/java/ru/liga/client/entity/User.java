@@ -18,7 +18,7 @@ public class User {
     @JsonProperty("name")
     private String name;
     @JsonProperty("gender")
-    private String gender;
+    private Gender gender;
     @JsonProperty("heading")
     private String heading;
     @JsonProperty("description")
@@ -26,7 +26,7 @@ public class User {
     private HashMap<Long, User> lovers = new HashMap<>();
     private HashMap<Long, User> loved = new HashMap<>();
 
-    public User(Long id, String name, String gender, String heading, String description) {
+    public User(Long id, String name, Gender gender, String heading, String description) {
         this.id = id;
         this.name = name;
         this.gender = gender;

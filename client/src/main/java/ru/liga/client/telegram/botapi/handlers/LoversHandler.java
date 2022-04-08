@@ -91,7 +91,7 @@ public class LoversHandler implements InputMessageHandler {
         SendMessage replyToUser;
         User currentLover = loversData.get(userDataCache.getLastLoverId(userId));
         sendImage(userId, currentLover);
-        String outputText = currentLover.getGender() +
+        String outputText = currentLover.getGender().getRus() +
                 ", " + currentLover.getName() +
                 ", " + checkSympathy(user, currentLover);
         replyToUser = new SendMessage(String.valueOf(userId), outputText);

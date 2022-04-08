@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.liga.client.controller.ServerController;
+import ru.liga.client.entity.Gender;
 import ru.liga.client.entity.User;
 import ru.liga.client.telegram.Bot;
 import ru.liga.client.telegram.botapi.botstate.BotState;
@@ -32,23 +33,29 @@ public class ButtonHelper {
 
     public void buttonsChooseProfileGender(long userId, String gender) {
         User user = userDataCache.getUserProfileData(userId);
-        user.setGender(gender);
+        if (gender.equals("Сударъ")){
+            user.setGender(Gender.MALE);
+        }else if (gender.equals("Сударыня")){
+            user.setGender(Gender.FEMALE);
+        }
         userDataCache.saveUserProfileData(userId, user);
         userDataCache.setUsersCurrentBotState(userId, BotState.ASK_HEAD);
     }
 
     public void buttonSearchChooseGender(long userId, String gender) {
         removeCacheSearch(userId);
+        Gender gen = gender.equals("Сударъ")?Gender.MALE:Gender.FEMALE;
         userDataCache.fillUsersProfilesForSearch(userId,
-                serverController.getAllWithFilter(u -> u.getGender().equals(gender)));
+                serverController.getAllWithFilter(u -> u.getGender().equals(gen)));
         userDataCache.setUsersCurrentBotState(userId, BotState.CHOSEN_LOVERS_GENDER);
     }
 
     public void buttonSearchAll(long userId) {
         removeCacheSearch(userId);
+
         userDataCache.fillUsersProfilesForSearch(userId,
-                serverController.getAllWithFilter(u -> u.getGender().equals("Сударъ")
-                        || u.getGender().equals("Сударыня")));
+                serverController.getAllWithFilter(u -> u.getGender().equals(Gender.MALE)
+                        || u.getGender().equals(Gender.FEMALE)));
         userDataCache.setUsersCurrentBotState(userId, BotState.CHOSEN_LOVERS_GENDER);
     }
 

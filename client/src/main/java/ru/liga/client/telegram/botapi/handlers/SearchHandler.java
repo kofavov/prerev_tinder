@@ -101,7 +101,7 @@ public class SearchHandler implements InputMessageHandler {
         User currentProfile = searchUsers.get(lastProfileId);
         sendImage(userId, currentProfile);
 
-        String outputText = currentProfile.getGender() + ", " + currentProfile.getName();
+        String outputText = currentProfile.getGender().getRus() + ", " + currentProfile.getName();
         replyToUser = new SendMessage(String.valueOf(userId), outputText);
         replyToUser.setReplyMarkup(getNavigateButtons());
         return replyToUser;

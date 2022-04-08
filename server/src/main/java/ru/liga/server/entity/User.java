@@ -26,8 +26,8 @@ public class User {
     @Column(name="heading",nullable = false)
     private String heading;
     @Column(name = "gender", nullable = false)
-//    @Enumerated(EnumType.STRING)
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     @Column(name = "description", nullable = false)
     private String description;
 
