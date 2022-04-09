@@ -70,7 +70,6 @@ public class TelegramFacade {
                 break;
             default:
                 botState = userDataCache.getUsersCurrentBotState(userId);
-                break;
         }
         return botState;
     }
@@ -131,7 +130,6 @@ public class TelegramFacade {
                 break;
             default:
                 userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
-                break;
         }
     }
 

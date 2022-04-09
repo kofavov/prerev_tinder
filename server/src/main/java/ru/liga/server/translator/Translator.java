@@ -13,8 +13,8 @@ public class Translator {
     public String translate(String s) {
         s = getStringWithYat(s);
         s = getStringWithHardSign(s);
-        s = getStringWithFeta(s);
         s = getStringWithI(s);
+        s = getStringWithFeta(s);
         return s.trim();
     }
 

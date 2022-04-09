@@ -32,7 +32,7 @@ public class LoversHandler implements InputMessageHandler {
 
 
     public LoversHandler(UserDataCache userDataCache, ReplyMessagesService messagesService,
-                         ServerController serverController, ImageService imageService,@Lazy Bot bot) {
+                         ServerController serverController, ImageService imageService, @Lazy Bot bot) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
         this.serverController = serverController;
@@ -65,7 +65,7 @@ public class LoversHandler implements InputMessageHandler {
             if (loversData == null || loversData.isEmpty()) {
                 return new SendMessage(String.valueOf(userId), "Список пуст");
             }
-            replyToUser = next(userId,  user, loversData);
+            replyToUser = next(userId, user, loversData);
         }
         return replyToUser;
     }
@@ -87,7 +87,7 @@ public class LoversHandler implements InputMessageHandler {
         return replyToUser;
     }
 
-    private SendMessage next(long userId,  User user, TreeMap<Long, User> loversData) {
+    private SendMessage next(long userId, User user, TreeMap<Long, User> loversData) {
         SendMessage replyToUser;
         User currentLover = loversData.get(userDataCache.getLastLoverId(userId));
         sendImage(userId, currentLover);
@@ -100,11 +100,14 @@ public class LoversHandler implements InputMessageHandler {
     }
 
     private String checkSympathy(User user, User currentLover) {
-        if (user.getLoved().containsKey(currentLover.getId())) {
+        if (user.getLoved().containsKey(currentLover.getId())
+                && user.getLovers().containsKey(currentLover.getId())) {
+            return "Взаимность";
+        } else if (user.getLoved().containsKey(currentLover.getId())) {
             return "Вы любимы";
         } else if (user.getLovers().containsKey(currentLover.getId())) {
             return "Любим вами";
-        } else return "Взаимность";
+        } else return "";
     }
 
 
@@ -127,7 +130,7 @@ public class LoversHandler implements InputMessageHandler {
         InlineKeyboardButton buttonMatch = new InlineKeyboardButton();
         InlineKeyboardButton buttonLoved = new InlineKeyboardButton();
 
-        buttonLovers.setText("Ваши любимцы");
+        buttonLovers.setText("Любимы Вами");
         buttonMatch.setText("Взаимность");
         buttonLoved.setText("Вы любимы");
         //Every button must have callBackData, or else not work !
@@ -154,7 +157,7 @@ public class LoversHandler implements InputMessageHandler {
         return ButtonHelper.getInlineKeyboardMarkup(inlineKeyboardMarkup, buttonBack, buttonMenu, buttonNext);
     }
 
-    private void sendImage(long userId,  User currentProfile) {
+    private void sendImage(long userId, User currentProfile) {
         File file = imageService.getFile(currentProfile);
         InputFile inputFile = new InputFile(file);
         bot.sendImage(SendPhoto.builder().photo(inputFile)
