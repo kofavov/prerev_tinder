@@ -63,6 +63,7 @@ public class TelegramFacade {
             case "/search":
                 botState = BotState.SEARCH;
                 buttonHelper.removeCacheSearch(userId);
+                buttonHelper.buttonSearch(userId);
                 break;
             case "/lovers":
                 botState = BotState.LOVERS;

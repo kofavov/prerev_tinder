@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.liga.client.controller.ServerController;
+import ru.liga.client.entity.Gender;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ImageService;
 import ru.liga.client.service.ReplyMessagesService;
@@ -106,6 +107,9 @@ public class LoversHandler implements InputMessageHandler {
         } else if (user.getLoved().containsKey(currentLover.getId())) {
             return "Вы любимы";
         } else if (user.getLovers().containsKey(currentLover.getId())) {
+            if(user.getLovers().get(currentLover.getId()).getGender().equals(Gender.FEMALE)){
+                return "Любима вами";
+            }
             return "Любим вами";
         } else return "";
     }
