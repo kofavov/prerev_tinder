@@ -42,7 +42,7 @@ public class TelegramFacade {
 
             replyMessage = handleInputMessage(update);
         }catch (Exception e){
-            log.error("Ошибка Update ID: {} \n {}",update.getUpdateId(),e.getStackTrace());
+            log.error("Ошибка Update ID: {}",update.getUpdateId(),e);
         }
 
         return replyMessage;
@@ -175,7 +175,7 @@ public class TelegramFacade {
         } catch (Exception e) {
             userDataCache.removeUser(userId);
             replyMessage = new SendMessage(String.valueOf(userId), "ошибка введите /start");
-            log.error("не удалось обработать запрос пользователя {} \n {}", userId,e.getStackTrace());
+            log.error("не удалось обработать запрос пользователя {}", userId,e);
         }
 
         return replyMessage;
