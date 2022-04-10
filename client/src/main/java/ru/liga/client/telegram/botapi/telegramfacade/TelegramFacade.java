@@ -28,7 +28,7 @@ public class TelegramFacade {
     }
 
     public BotApiMethod<?> handleUpdate(Update update) {
-        log.info(update.getUpdateId().toString());
+        log.info("update ID: {}",update.getUpdateId().toString());
         BotApiMethod<?> replyMessage = null;
         try {
 
@@ -42,7 +42,7 @@ public class TelegramFacade {
 
             replyMessage = handleInputMessage(update);
         }catch (Exception e){
-            log.info("Ошибка Update {}",update.getUpdateId());
+            log.error("Ошибка Update ID: {} \n {}",update.getUpdateId(),e.getStackTrace());
         }
 
         return replyMessage;
@@ -138,7 +138,7 @@ public class TelegramFacade {
     private Long getUserId(Update update) {
         Long id = null;
         Message message = update.getMessage();
-        if (message != null && message.hasText()) {
+        if (isMessageNotEmpty(message)) {
             id = message.getFrom().getId();
         } else if (update.hasCallbackQuery()) {
             id = update.getCallbackQuery().getFrom().getId();
@@ -148,36 +148,37 @@ public class TelegramFacade {
         return id;
     }
 
+    private boolean isMessageNotEmpty(Message message) {
+        return message != null && message.hasText();
+    }
+
     private BotApiMethod<?> handleInputMessage(Update update) {
         Long userId = getUserId(update);
 
-        if (userId == null) return null;
+        if (userId == null) {
+            return null;
+        }
 
         BotState botState = userDataCache.getUsersCurrentBotState(userId);
         BotApiMethod<?> replyMessage;
         Message message = update.getMessage();
-        if (message != null && message.hasText()) {
+        if (isMessageNotEmpty(message)) {
             String inputMessage = message.getText();
             log.info("Message from User {} Text {}", message.getFrom().getId(), message.getText());
             botState = chooseBotStateFromInputText(userId, inputMessage);
         }
+
         userDataCache.setUsersCurrentBotState(userId, botState);
+
         try {
             replyMessage = botStateContext.processInputMessage(botState, update, userId);
         } catch (Exception e) {
             userDataCache.removeUser(userId);
             replyMessage = new SendMessage(String.valueOf(userId), "ошибка введите /start");
-            log.info("не удалось обработать запрос пользователя {}", userId);
+            log.error("не удалось обработать запрос пользователя {} \n {}", userId,e.getStackTrace());
         }
 
         return replyMessage;
     }
 
-    private AnswerCallbackQuery sendAnswerCallbackQuery(String text, boolean alert, CallbackQuery callbackquery) {
-        AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
-        answerCallbackQuery.setCallbackQueryId(callbackquery.getId());
-        answerCallbackQuery.setShowAlert(alert);
-        answerCallbackQuery.setText(text);
-        return answerCallbackQuery;
-    }
 }

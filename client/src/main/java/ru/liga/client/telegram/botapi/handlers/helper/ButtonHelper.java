@@ -8,8 +8,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ButtonHelper {
+    private ButtonHelper() {
+    }
+
     public static InlineKeyboardMarkup getInlineKeyboardMarkup(InlineKeyboardMarkup inlineKeyboardMarkup,
-                                                         InlineKeyboardButton... buttons) {
+                                                               InlineKeyboardButton... buttons) {
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>(Arrays.asList(buttons));
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(keyboardButtonsRow1);

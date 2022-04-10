@@ -1,6 +1,7 @@
 package ru.liga.client.telegram;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -9,7 +10,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.liga.client.telegram.botapi.telegramfacade.TelegramFacade;
 
+import java.util.Arrays;
 
+@Slf4j
 public class Bot extends TelegramWebhookBot {
     private final String name;
     private final String token;
@@ -34,7 +37,7 @@ public class Bot extends TelegramWebhookBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(),e);
         }
     }
 
@@ -42,11 +45,9 @@ public class Bot extends TelegramWebhookBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(),e);
         }
     }
-
-    ;
 
     @Override
     public String getBotUsername() {

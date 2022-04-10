@@ -1,5 +1,6 @@
 package ru.liga.server.translator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+@Slf4j
 @Component
 public class Translator {
 
@@ -27,33 +29,25 @@ public class Translator {
     }
 
     private Map<String, String> getRootWithYat() {
-        List<String> root = new ArrayList<>();
+        Path rootWithYat = Path.of("server/src/main/resources/root_with_yat.csv");
+        List<String> root = getStringsFromFile(rootWithYat);
         Map<String, String> map = new HashMap<>();
-        try {
-            root = Files.readAllLines(Path.of("server\\root_with_yat.csv"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         for (String r : root) {
             String[] values = r.split("\t");
             if (values.length == 2)
                 map.put(values[0], values[1]);
-                map.put(values[0].toUpperCase(Locale.ROOT),values[1].toUpperCase(Locale.ROOT));
-                map.put(values[0].substring(0,1).toUpperCase(Locale.ROOT)+values[0].substring(1),
-                        values[1].substring(0,1).toUpperCase(Locale.ROOT)+values[1].substring(1));
+            map.put(values[0].toUpperCase(Locale.ROOT), values[1].toUpperCase(Locale.ROOT));
+            map.put(values[0].substring(0, 1).toUpperCase(Locale.ROOT) + values[0].substring(1),
+                    values[1].substring(0, 1).toUpperCase(Locale.ROOT) + values[1].substring(1));
         }
         return map;
     }
 
     private Map<String, String> getWordWithYat() {
-        List<String> words = new ArrayList<>();
-        Map<String, String> map = new HashMap<>();
-        try {
-            words = Files.readAllLines(Path.of("server\\words_with_yat.csv"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Path wordsWithYat = Path.of("server/src/main/resources/words_with_yat.csv");
+        List<String> words = getStringsFromFile(wordsWithYat);
 
+        Map<String, String> map = new HashMap<>();
         for (String w : words) {
             String[] values = w.split("\t");
             if (values.length == 2)
@@ -80,14 +74,8 @@ public class Translator {
     }
 
     private List<String> getNamesWithF() {
-        List<String> names = new ArrayList<>();
-        try {
-            names = Files.readAllLines(Path.of("server\\names_with_ф.csv"));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return names;
+        Path namesWithFeta = Path.of("server/src/main/resources/names_with_ф.csv");
+        return getStringsFromFile(namesWithFeta);
     }
 
     private String getStringWithI(String s) {
@@ -144,5 +132,15 @@ public class Translator {
             stringBuilder.append(word).append(sign).append(" ");
         }
         return stringBuilder.toString();
+    }
+
+    private List<String> getStringsFromFile(Path path) {
+        List<String> root = new ArrayList<>();
+        try {
+            root = Files.readAllLines(path);
+        } catch (IOException e) {
+            log.error("Нет  файла по пути {},\n{}", path,e);
+        }
+        return root;
     }
 }

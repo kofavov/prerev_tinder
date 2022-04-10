@@ -10,7 +10,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.liga.client.controller.ServerController;
+import ru.liga.client.server.ServerClient;
+import ru.liga.client.server.ServerClientImpl;
 import ru.liga.client.entity.Gender;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ImageService;
@@ -27,16 +28,16 @@ import java.util.TreeMap;
 public class LoversHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final ReplyMessagesService messagesService;
-    private final ServerController serverController;
+    private final ServerClient serverClient;
     private final ImageService imageService;
     private final Bot bot;
 
 
     public LoversHandler(UserDataCache userDataCache, ReplyMessagesService messagesService,
-                         ServerController serverController, ImageService imageService, @Lazy Bot bot) {
+                         ServerClient serverClient, ImageService imageService, @Lazy Bot bot) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
-        this.serverController = serverController;
+        this.serverClient = serverClient;
         this.imageService = imageService;
         this.bot = bot;
     }
@@ -74,28 +75,27 @@ public class LoversHandler implements InputMessageHandler {
     private User prepareUserDataCash(long userId) {
         User user = userDataCache.getUserProfileData(userId);
         if (user.getId() == null) {
-            user = serverController.getUserById(userId);
+            user = serverClient.getUserById(userId);
             userDataCache.saveUserProfileData(userId, user);
         }
         return user;
     }
 
     private SendMessage lovers(long userId) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
+        SendMessage replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
                 "reply.chooseLovers");
         replyToUser.setReplyMarkup(getLoversButtonMarkup());
         return replyToUser;
     }
 
     private SendMessage next(long userId, User user, TreeMap<Long, User> loversData) {
-        SendMessage replyToUser;
         User currentLover = loversData.get(userDataCache.getLastLoverId(userId));
         sendImage(userId, currentLover);
         String outputText = currentLover.getGender().getRus() +
                 ", " + currentLover.getName() +
                 ", " + checkSympathy(user, currentLover);
-        replyToUser = new SendMessage(String.valueOf(userId), outputText);
+
+        SendMessage replyToUser = new SendMessage(String.valueOf(userId), outputText);
         replyToUser.setReplyMarkup(getLoversNavigateButtonsMarkup());
         return replyToUser;
     }

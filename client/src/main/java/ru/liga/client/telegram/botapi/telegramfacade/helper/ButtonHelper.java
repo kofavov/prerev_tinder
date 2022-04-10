@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import ru.liga.client.controller.ServerController;
+import ru.liga.client.server.ServerClient;
 import ru.liga.client.entity.FindGender;
 import ru.liga.client.entity.Gender;
 import ru.liga.client.entity.User;
@@ -22,13 +22,13 @@ import java.util.function.Predicate;
 public class ButtonHelper {
 
     private final UserDataCache userDataCache;
-    private final ServerController serverController;
+    private final ServerClient serverClient;
     private final Bot bot;
 
-    public ButtonHelper(UserDataCache userDataCache, ServerController serverController,
+    public ButtonHelper(UserDataCache userDataCache, ServerClient serverClient,
                         @Lazy Bot bot) {
         this.userDataCache = userDataCache;
-        this.serverController = serverController;
+        this.serverClient = serverClient;
         this.bot = bot;
     }
 
@@ -64,7 +64,7 @@ public class ButtonHelper {
     public void buttonSearch(long userId) {
         User user = userDataCache.getUserProfileData(userId);
         if (user.getId() == null) {
-            user = serverController.getUserById(userId);
+            user = serverClient.getUserById(userId);
         }
         final Gender userGender = user.getGender();
         final FindGender findGender = user.getFind();
@@ -85,7 +85,7 @@ public class ButtonHelper {
         }
 
         userDataCache.fillUsersProfilesForSearch(userId,
-                serverController.getAllWithFilter(filter));
+                serverClient.getAllWithFilter(filter));
 
     }
 
@@ -98,7 +98,7 @@ public class ButtonHelper {
         } catch (Exception e) {
             log.info("Возлюбленный {} юзера {} не удален из кэша", lastProfile, userId);
         }
-        serverController.removeLover(userId, lastProfile);
+        serverClient.removeLover(userId, lastProfile);
 
         newLastSearchId(userId, lastProfile);
     }
@@ -110,7 +110,7 @@ public class ButtonHelper {
         try {
             User lover = userDataCache.getUserProfilesForSearch(userId).get(lastProfileId);
             user.getLovers().put(lastProfileId, lover);
-            serverController.addNewLover(userId, lastProfileId);
+            serverClient.addNewLover(userId, lastProfileId);
         } catch (Exception e) {
             log.info("Ошибка при добавлении Возлюбленного {} юзера {} в список возлюбленных",
                     userId, lastProfileId);
@@ -138,7 +138,7 @@ public class ButtonHelper {
 
     public void buttonLovers(long userId) {
         removeCacheLovers(userId);
-        User user = serverController.getUserById(userId);
+        User user = serverClient.getUserById(userId);
         userDataCache.saveUserProfileData(userId, user);
         userDataCache.fillUserLoversData(userId, user.getLovers());
         userDataCache.setUsersCurrentBotState(userId, BotState.NEXT_LOVERS);
@@ -146,7 +146,7 @@ public class ButtonHelper {
 
     public void buttonLoved(long userId) {
         removeCacheLovers(userId);
-        User user = serverController.getUserById(userId);
+        User user = serverClient.getUserById(userId);
         userDataCache.saveUserProfileData(userId, user);
         userDataCache.fillUserLoversData(userId, user.getLoved());
         userDataCache.setUsersCurrentBotState(userId, BotState.NEXT_LOVERS);
@@ -154,7 +154,7 @@ public class ButtonHelper {
 
     public void buttonMatch(long userId) {
         removeCacheLovers(userId);
-        User user = serverController.getUserById(userId);
+        User user = serverClient.getUserById(userId);
         userDataCache.saveUserProfileData(userId, user);
         Map<Long, User> lovers = user.getLovers();
         Map<Long, User> loved = user.getLoved();
@@ -208,7 +208,7 @@ public class ButtonHelper {
         TreeMap<Long, User> searchUsers =
                 userDataCache.getUserProfilesForSearch(userId);
         User currentSearchProfile = searchUsers.get(lastProfileId);
-        serverController.fillLoversMap(lastProfileId, currentSearchProfile);
+        serverClient.fillLoversMap(lastProfileId, currentSearchProfile);
         currentSearchProfile.setLovers(currentSearchProfile.getLovers());
         if (currentSearchProfile.getLovers().containsKey(userId)) {
             bot.sendMessage(new SendMessage(String.valueOf(userId), "Вы любимы!"));

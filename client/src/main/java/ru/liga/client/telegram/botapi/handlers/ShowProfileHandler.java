@@ -7,7 +7,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.liga.client.controller.ServerController;
+import ru.liga.client.server.ServerClient;
+import ru.liga.client.server.ServerClientImpl;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ImageService;
 import ru.liga.client.service.ReplyMessagesService;
@@ -21,17 +22,17 @@ import java.io.File;
 public class ShowProfileHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final ReplyMessagesService messagesService;
-    private final ServerController serverController;
+    private final ServerClient serverClient;
     private final ImageService imageService;
     private final Bot bot;
 
     public ShowProfileHandler(UserDataCache userDataCache
             , ReplyMessagesService messagesService
-            , ServerController serverController
+            , ServerClient serverClient
             , ImageService imageService,@Lazy Bot bot) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
-        this.serverController = serverController;
+        this.serverClient = serverClient;
         this.imageService = imageService;
         this.bot = bot;
     }
@@ -43,7 +44,7 @@ public class ShowProfileHandler implements InputMessageHandler {
     private BotApiMethod<?> processUsersInput(Update update, long userId) {
         User user = userDataCache.getUserProfileData(userId);
         if (user.getId() == null){
-            user = serverController.getUserById(userId);
+            user = serverClient.getUserById(userId);
             userDataCache.saveUserProfileData(userId, user);
         }
         File file = imageService.getFile(user);

@@ -11,7 +11,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.liga.client.controller.ServerController;
+import ru.liga.client.server.ServerClient;
+import ru.liga.client.server.ServerClientImpl;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ImageService;
 import ru.liga.client.service.ReplyMessagesService;
@@ -28,16 +29,16 @@ import java.util.TreeMap;
 public class SearchHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final ReplyMessagesService messagesService;
-    private final ServerController serverController;
+    private final ServerClient serverClient;
     private final ImageService imageService;
     private final Bot bot;
 
 
     public SearchHandler(UserDataCache userDataCache, ReplyMessagesService messagesService
-            , ServerController serverController, ImageService imageService, @Lazy Bot bot) {
+            , ServerClient serverClient, ImageService imageService, @Lazy Bot bot) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
-        this.serverController = serverController;
+        this.serverClient = serverClient;
         this.imageService = imageService;
         this.bot = bot;
     }
@@ -71,14 +72,13 @@ public class SearchHandler implements InputMessageHandler {
     private void prepareUserDataCash(long userId) {
         User user = userDataCache.getUserProfileData(userId);
         if (user.getId() == null) {
-            user = serverController.getUserById(userId);
+            user = serverClient.getUserById(userId);
             userDataCache.saveUserProfileData(userId, user);
         }
     }
 
 
     private SendMessage next(long userId) {
-        SendMessage replyToUser;
         TreeMap<Long, User> searchUsers =
                 userDataCache.getUserProfilesForSearch(userId);
         Long lastProfileId = userDataCache.getLastSearchIdForUser(userId);
@@ -90,9 +90,9 @@ public class SearchHandler implements InputMessageHandler {
 
         User currentProfile = searchUsers.get(lastProfileId);
         sendImage(userId, currentProfile);
-
         String outputText = currentProfile.getGender().getRus() + ", " + currentProfile.getName();
-        replyToUser = new SendMessage(String.valueOf(userId), outputText);
+
+        SendMessage replyToUser = new SendMessage(String.valueOf(userId), outputText);
         replyToUser.setReplyMarkup(getNavigateButtons());
         return replyToUser;
     }

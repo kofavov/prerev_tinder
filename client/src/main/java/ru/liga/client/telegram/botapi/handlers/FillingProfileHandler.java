@@ -8,7 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.liga.client.controller.ServerController;
+import ru.liga.client.server.ServerClient;
+import ru.liga.client.server.ServerClientImpl;
 import ru.liga.client.entity.User;
 import ru.liga.client.service.ReplyMessagesService;
 import ru.liga.client.telegram.Bot;
@@ -20,15 +21,13 @@ import ru.liga.client.telegram.cache.UserDataCache;
 public class FillingProfileHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final ReplyMessagesService messagesService;
-    private final ServerController serverController;
-    private final Bot bot;
+    private final ServerClient serverClient;
 
     public FillingProfileHandler(UserDataCache userDataCache, ReplyMessagesService messagesService,
-                                 ServerController serverController,@Lazy Bot bot) {
+                                 ServerClient serverClient) {
         this.userDataCache = userDataCache;
         this.messagesService = messagesService;
-        this.serverController = serverController;
-        this.bot = bot;
+        this.serverClient = serverClient;
     }
 
     @Override
@@ -50,7 +49,7 @@ public class FillingProfileHandler implements InputMessageHandler {
         SendMessage replyToUser = null;
 
         if (botState.equals(BotState.START)) {
-            User user = serverController.getUserById(userId);
+            User user = serverClient.getUserById(userId);
             if (user == null) {
                 botState = BotState.FILLING_PROFILE;
             } else {
@@ -86,7 +85,7 @@ public class FillingProfileHandler implements InputMessageHandler {
             botState = filledProfile(userId, usersAnswer, profileData);
         }
         if (botState.equals(BotState.PRE_SEARCH)) {
-            profileData = serverController.getUserById(userId);
+            profileData = serverClient.getUserById(userId);
 
             replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.help");
             replyToUser.setReplyMarkup(getMenuButtonsMarkup());
@@ -107,8 +106,7 @@ public class FillingProfileHandler implements InputMessageHandler {
     }
 
     private SendMessage startFillingProfile(long userId, User profileData) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
+        SendMessage replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
                 "reply.start", "reply.askName");
         profileData.setId(userId);
         userDataCache.setUsersCurrentBotState(userId, BotState.ASK_GENDER);
@@ -116,57 +114,48 @@ public class FillingProfileHandler implements InputMessageHandler {
     }
 
     private SendMessage askName(long userId) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
+        SendMessage replyToUser = messagesService.getReplyMessage(String.valueOf(userId),
                 "reply.askName");
         userDataCache.setUsersCurrentBotState(userId, BotState.ASK_GENDER);
         return replyToUser;
     }
 
     private SendMessage askGender(long userId, String usersAnswer, User profileData) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askGender");
+        SendMessage replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askGender");
         profileData.setName(usersAnswer);
         replyToUser.setReplyMarkup(getGenderButtonsMarkup());
         return replyToUser;
     }
 
     private SendMessage askHead(long userId) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askHead");
+        SendMessage replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askHead");
 //            profileData.setGender(usersAnswer);
         userDataCache.setUsersCurrentBotState(userId, BotState.ASK_DESC);
         return replyToUser;
     }
 
     private SendMessage askDesk(long userId, String usersAnswer, User profileData) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askDesc");
+        SendMessage replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.askDesc");
         profileData.setHeading(usersAnswer);
         userDataCache.setUsersCurrentBotState(userId, BotState.ASK_FIND_GENDER);
         return replyToUser;
     }
 
     private SendMessage askFindGender(long userId, String usersAnswer, User profileData) {
-        SendMessage replyToUser;
-        replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.chooseLoversGender");
+        SendMessage replyToUser = messagesService.getReplyMessage(String.valueOf(userId), "reply.chooseLoversGender");
         profileData.setDescription(usersAnswer);
         replyToUser.setReplyMarkup(getFindGenderButtonsMarkup());
         return replyToUser;
     }
 
     private BotState filledProfile(long userId, String usersAnswer, User profileData) {
-        BotState botState;
-//        profileData.setDescription(usersAnswer);
         userDataCache.setUsersCurrentBotState(userId, BotState.PRE_SEARCH);
-        serverController.saveNewUser(profileData);
-        botState = BotState.PRE_SEARCH;
-        return botState;
+        serverClient.saveNewUser(profileData);
+        return BotState.PRE_SEARCH;
     }
 
     private SendMessage getMessageWhenUserAlreadyExist(long userId, User user) {
-        SendMessage replyToUser;
-        replyToUser = new SendMessage(String.valueOf(userId), String.format("%s %s \n%s",
+        SendMessage replyToUser = new SendMessage(String.valueOf(userId), String.format("%s %s \n%s",
                 "Анкета уже была создана\nДанные по вашей анкете"
                 , user
                 , messagesService

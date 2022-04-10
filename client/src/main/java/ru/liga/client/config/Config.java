@@ -7,7 +7,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import ru.liga.client.controller.ServerController;
+import ru.liga.client.server.ServerClient;
+import ru.liga.client.server.ServerClientImpl;
 import ru.liga.client.telegram.Bot;
 import ru.liga.client.telegram.botapi.telegramfacade.TelegramFacade;
 
@@ -23,6 +24,10 @@ public class Config {
     private String webHookPath;
     @Value("${backend.url}")
     private String urlResource;
+    @Value("${backend.url.lovers}")
+    private String loversResource;
+    @Value("${backend.url.loved}")
+    private String lovedResource;
 
     @Bean
     public Bot bot(TelegramFacade telegramFacade) {
@@ -36,8 +41,8 @@ public class Config {
         return messageSource;
     }
     @Bean
-    public ServerController serverController(){
-        return new ServerController(urlResource);
+    public ServerClient serverController(){
+        return new ServerClientImpl(urlResource, loversResource, lovedResource);
     }
 
 }
